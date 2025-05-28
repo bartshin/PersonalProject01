@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Architecture;
 
 public class BorneCraftAttack 
 {
@@ -12,11 +13,19 @@ public class BorneCraftAttack
   public Action OnShoot;
   public Configs configs;
   float remainDelay;
+  Transform body;
   Transform targetTransform;
+  MonoBehaviourPool<BorneCraftProjectile> projectilePool;
 
-  public BorneCraftAttack(Configs configs)
+  public BorneCraftAttack(Transform body, GameObject projectile, Configs configs)
   {
+    this.body = body;
     this.configs = configs;
+    this.projectilePool = new (
+      poolSize: 20,
+      maxPoolSize: 100,
+      prefab: projectile 
+    );
   }
 
   public void SetTarget(Transform transform)
@@ -41,6 +50,10 @@ public class BorneCraftAttack
 
   void Shoot() 
   {
+    var projectile = this.projectilePool.Get();
+    projectile.transform.position = this.body.position;
+    projectile.Speed = 20f;
+    projectile.TargetPosition = this.targetTransform.position;
     if (this.OnShoot != null) {
       this.OnShoot.Invoke();
     }

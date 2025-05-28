@@ -14,6 +14,7 @@ public class BorneCraftMovement
   {
     public float Speed;
     public (float min, float max) MoveAngle;
+    public float HalfMoveAngle;
     public float MaxShootAngle;
     public float PrepareSortieTime;
     public float ShootRange;
@@ -28,6 +29,7 @@ public class BorneCraftMovement
       this.Speed = speed;
       this.MoveAngle = (moveAngles.min * 2 * MathF.PI/ 360f, 
           moveAngles.max * 2 * MathF.PI/ 360f);
+      this.HalfMoveAngle = (this.MoveAngle.min + this.MoveAngle.max) * 0.5f;
       this.MaxShootAngle = maxShootAngle * 2 * MathF.PI / 360f;
       this.ShootRange = shootRange;
       this.PrepareSortieTime = prepareSortieTime;
@@ -38,14 +40,16 @@ public class BorneCraftMovement
   public Action OnSortie;
   public Configs configs;
   public float TargetDistance;
+  float targetDistance;
   public bool IsShootable { get; private set; }
   EclipseOrbit orbit;
   float angleSpeed;
-  float currentOrgbitAngle;
+  float currentOrbitAngle;
   Rigidbody rb;
   Transform transform;
   Transform container;
   float waitToSortie;
+  float returnThreshold;
   bool isSortied;
   Transform target;
 
@@ -61,7 +65,13 @@ public class BorneCraftMovement
   public void SetTarget(Transform target)
   {
     this.target = target;
-    this.currentOrgbitAngle = this.configs.MoveAngle.max;
+    this.returnThreshold = Math.Clamp(
+      Vector3.Distance(
+        this.container.transform.position, target.position) * 0.05f,
+      0.5f,
+      2f
+    );
+    this.currentOrbitAngle = this.configs.MoveAngle.max;
     this.SetOrbit(target.position);
   }
 
@@ -72,20 +82,19 @@ public class BorneCraftMovement
       this.Sortie();
     }
     if (this.target != null) {
-      this.IsShootable = this.currentOrgbitAngle < this.configs.MaxShootAngle;
+      this.IsShootable = this.currentOrbitAngle < this.configs.MaxShootAngle;
     }
     else {
       this.IsShootable = false;
     }
     if (this.isSortied) {
-      this.currentOrgbitAngle =
-        this.currentOrgbitAngle + this.angleSpeed * deltaTime;
-      if (this.currentOrgbitAngle > this.configs.MoveAngle.max) {
+      this.UpdatePosition(deltaTime);
+      this.UpdateRotation(deltaTime);
+      if (this.currentOrbitAngle > this.configs.HalfMoveAngle &&
+          Vector2.Distance(
+            this.transform.position, this.container.position) < 
+          this.returnThreshold) {
         this.ReturnToMotherShip();
-      }
-      else {
-        this.UpdateRotation(deltaTime);
-        this.UpdatePosition(deltaTime);
       }
     }
     else {
@@ -96,14 +105,14 @@ public class BorneCraftMovement
   void Sortie()
   {
     this.isSortied = true;
-    this.currentOrgbitAngle = this.configs.MoveAngle.min;
+    this.currentOrbitAngle = this.configs.MoveAngle.min;
     this.SetOrbit(this.target.position);
     this.transform.localPosition = Vector3.Lerp(
       Vector3.zero,
       new Vector3(
-        MathF.Cos(this.currentOrgbitAngle) * this.orbit.Width,
+        MathF.Cos(this.currentOrbitAngle) * this.orbit.Width,
         this.transform.localPosition.y,
-        MathF.Sin(this.currentOrgbitAngle) * this.orbit.Length
+        MathF.Sin(this.currentOrbitAngle) * this.orbit.Length
         ),
       0.2f
     );
@@ -132,13 +141,15 @@ public class BorneCraftMovement
 
   void UpdatePosition(float deltaTime)
   {
-   if (this.currentOrgbitAngle < this.configs.MoveAngle.max * 0.8) {
+   if (this.currentOrbitAngle < this.configs.MoveAngle.max) {
+      this.currentOrbitAngle =
+        this.currentOrbitAngle + this.angleSpeed * deltaTime;
       this.transform.localPosition = Vector3.Lerp(
         this.transform.localPosition,
         new Vector3(
-          MathF.Cos(this.currentOrgbitAngle) * this.orbit.Width,
+          MathF.Cos(this.currentOrbitAngle) * this.orbit.Width,
           this.transform.localPosition.y,
-          MathF.Sin(this.currentOrgbitAngle) * this.orbit.Length
+          MathF.Sin(this.currentOrbitAngle) * this.orbit.Length
         ),
         1f * deltaTime
       );
@@ -157,7 +168,7 @@ public class BorneCraftMovement
     if (this.IsShootable) {
       this.transform.LookAt(this.target);
     }
-    else if (this.currentOrgbitAngle < this.configs.MoveAngle.max * 0.85) {
+    else if (this.currentOrbitAngle < this.configs.MoveAngle.max * 0.85) {
       var containerDir = (this.container.position - this.transform.position).normalized;
       this.transform.rotation = Quaternion.Lerp(
         this.transform.rotation,

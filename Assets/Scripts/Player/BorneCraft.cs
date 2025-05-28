@@ -8,6 +8,8 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   GameObject body;
   [SerializeField]
+  GameObject projectile;
+  [SerializeField]
   Rigidbody rb;
   [SerializeField]
   Transform target;
@@ -32,7 +34,7 @@ public class BorneCraft : MonoBehaviour
   BorneCraftAttack attack;
   bool isSortie;
   float targetDistance;
-  (float min, float max) containerOffset = (2f, 10f);
+  (float min, float max) containerOffset = (1f, 10f);
 
   public void SetTarget(Transform target)
   {
@@ -52,6 +54,8 @@ public class BorneCraft : MonoBehaviour
   BorneCraftAttack InitAttack()
   {
     var attack = new BorneCraftAttack(
+      body: this.body.transform,
+      projectile: this.projectile,
       configs: this.CreateAttackConfigs()
     );
     if (this.target != null) {
@@ -154,7 +158,7 @@ public class BorneCraft : MonoBehaviour
     );
     this.transform.localPosition = dir * 
       Math.Clamp(
-        dist * 0.2f,
+        dist * 0.1f,
         this.containerOffset.min,
         this.containerOffset.max
       );
