@@ -11,11 +11,11 @@ namespace Architecture
         if ((this.innerValue == null && value != null) ||
             (this.innerValue != null && value == null) ||
               !this.innerValue.Equals(value)) {
-          if (this.WillChange != null) {
-            this.WillChange(value);
+          if (this.WillChange != null && this.innerValue != null) {
+            this.WillChange(this.innerValue);
           }
           this.innerValue = value;
-          if (this.OnChanged != null) {
+          if (this.OnChanged != null && value != null) {
             this.OnChanged.Invoke(value);
           }
         }

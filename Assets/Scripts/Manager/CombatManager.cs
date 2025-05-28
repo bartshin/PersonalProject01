@@ -15,6 +15,8 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     this.enemyLayer = (1 << LayerMask.NameToLayer("Enemy"));
     this.SelectedEnemy = new (null);
     this.LastHitEnemy = (null, null);
+    this.SelectedEnemy.WillChange += (enemy) => enemy.OnDestroyed -= this.OnEnemyDestroyed;
+    this.SelectedEnemy.OnChanged += (enemy) => enemy.OnDestroyed += this.OnEnemyDestroyed;
   }
 
   // Start is called before the first frame update
@@ -28,6 +30,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   {
     if (Input.GetKeyDown(InputSettings.SelectEnemyButton)) {
       var selectedEnemy = this.FindEnemy(); 
+      Debug.Log(selectedEnemy);
       if (selectedEnemy != null) {
         this.SelectedEnemy.Value = selectedEnemy;
       }
@@ -47,6 +50,13 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
     else {
       return (null);
+    }
+  }
+
+  void OnEnemyDestroyed(IDamagable enemy)
+  {
+    if (this.SelectedEnemy.Value == enemy) {
+      this.SelectedEnemy.Value = null;
     }
   }
 }

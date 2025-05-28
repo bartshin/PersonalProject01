@@ -8,6 +8,7 @@ public interface IDamagable
 
   public int TakeDamage(int attackDamage);
   public int TakeDamage(int attackDamage, Transform attacker);
+  public Action<IDamagable> OnDestroyed { get; set; }
   public GameObject gameObject { get; }
 
   virtual protected void Register(GameObject gameObject) {

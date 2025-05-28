@@ -25,24 +25,30 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
   Action<BorneCraftProjectile> onDisabled;
   public int Damage;
   public float Speed;
+  public float LifeTime = 5f;
+  public GameObject FiredShip;
   Vector3 targetPosition;
   Vector3 dir;
+  float remainingLifeTime; 
 
   // Start is called before the first frame update
   void Start()
   {
-
   }
 
   // Update is called once per frame
   void Update()
   {
+    this.remainingLifeTime -= Time.deltaTime;
     this.transform.position += this.dir * this.Speed * Time.deltaTime;
+    if (this.remainingLifeTime < 0) {
+      this.gameObject.SetActive(false);
+    }
   }
 
   void OnEnable()
   {
-
+    this.remainingLifeTime = this.LifeTime;
   }
 
   void OnDisable()
@@ -65,7 +71,7 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
       }
     }
     if (damagable != null) {
-      damagable.TakeDamage(this.Damage);
+      damagable.TakeDamage(this.Damage, this.FiredShip.transform);
     }
     this.gameObject.SetActive(false);
   }

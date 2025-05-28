@@ -140,13 +140,13 @@ public class BorneCraft : MonoBehaviour
   void OnEnemeySelected(IDamagable enemy) 
   {
     if (enemy != null) {
+      this.body.SetActive(true);
       this.SetTarget(enemy.gameObject.transform);
     }
   }
 
   void OnShoot()
   {
-    Debug.Log("shoot"); 
   }
 
   void OnReturnToShip()
