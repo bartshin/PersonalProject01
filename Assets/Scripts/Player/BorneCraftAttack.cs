@@ -8,6 +8,7 @@ public class BorneCraftAttack
   public struct Configs
   {
     public float ShootDelay;
+    public int Damage;
   }
 
   public Action OnShoot;
@@ -53,6 +54,7 @@ public class BorneCraftAttack
     var projectile = this.projectilePool.Get();
     projectile.transform.position = this.body.position;
     projectile.Speed = 20f;
+    projectile.Damage = this.configs.Damage;
     projectile.TargetPosition = this.targetTransform.position;
     if (this.OnShoot != null) {
       this.OnShoot.Invoke();

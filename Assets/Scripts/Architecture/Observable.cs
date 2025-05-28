@@ -8,7 +8,9 @@ namespace Architecture
     public T Value {
       get => this.innerValue;
       set {
-        if (!this.innerValue.Equals(value)) {
+        if ((this.innerValue == null && value != null) ||
+            (this.innerValue != null && value == null) ||
+              !this.innerValue.Equals(value)) {
           if (this.WillChange != null) {
             this.WillChange(value);
           }

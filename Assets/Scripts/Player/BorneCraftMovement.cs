@@ -53,16 +53,17 @@ public class BorneCraftMovement
   bool isSortied;
   Transform target;
 
-  public BorneCraftMovement(Transform container, Rigidbody rigidbody, Transform transform, Configs configs)
+  public BorneCraftMovement(Transform container, Rigidbody rigidbody, Transform transform, Configs configs, float waitOffset = 0f)
   {
     this.container = container;
     this.rb = rigidbody;
     this.transform = transform;
     this.configs = configs; 
     this.isSortied = false;
+    this.waitToSortie = waitOffset;
   }
   
-  public void SetTarget(Transform target)
+  public void SetTarget(Transform target, float waitTime = 0)
   {
     this.target = target;
     this.returnThreshold = Math.Clamp(
@@ -72,6 +73,7 @@ public class BorneCraftMovement
       2f
     );
     this.currentOrbitAngle = this.configs.MoveAngle.max;
+    this.waitToSortie = waitTime;
     this.SetOrbit(target.position);
   }
 

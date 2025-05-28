@@ -29,6 +29,10 @@ public class BorneCraft : MonoBehaviour
   float shootRange;
   [SerializeField]
   float shootDelay;
+  [SerializeField]
+  int shootDamage;
+  [SerializeField]
+  float waitOffset;
 
   BorneCraftMovement movement;
   BorneCraftAttack attack;
@@ -38,7 +42,8 @@ public class BorneCraft : MonoBehaviour
 
   public void SetTarget(Transform target)
   {
-    this.movement.SetTarget(target);
+    this.target = target;
+    this.movement.SetTarget(target, this.waitOffset);
     this.attack.SetTarget(target);
   }
 
@@ -68,7 +73,8 @@ public class BorneCraft : MonoBehaviour
   BorneCraftAttack.Configs CreateAttackConfigs()
   {
     return (new BorneCraftAttack.Configs {
-      ShootDelay = this.shootDelay
+      ShootDelay = this.shootDelay,
+      Damage = this.shootDamage
     });
   }
 
@@ -78,7 +84,8 @@ public class BorneCraft : MonoBehaviour
       container: this.transform,
       rigidbody: this.rb,
       transform: this.body.transform,
-      configs: this.CreateMovementConfigs() 
+      configs: this.CreateMovementConfigs(),
+      waitOffset: this.waitOffset
     ));
     if (this.target != null) {
       movement.SetTarget(this.target);
@@ -102,7 +109,7 @@ public class BorneCraft : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-
+    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnEnemeySelected;
   }
 
   // Update is called once per frame
@@ -130,6 +137,13 @@ public class BorneCraft : MonoBehaviour
     this.SetTarget(this.target);
   }
 
+  void OnEnemeySelected(IDamagable enemy) 
+  {
+    if (enemy != null) {
+      this.SetTarget(enemy.gameObject.transform);
+    }
+  }
+
   void OnShoot()
   {
     Debug.Log("shoot"); 
@@ -150,7 +164,11 @@ public class BorneCraft : MonoBehaviour
   void UpdateContainer()
   {
     this.transform.localPosition = Vector3.zero;
-    this.transform.LookAt(this.target);
+    var rotation = Quaternion.LookRotation(
+      this.target.position - this.transform.position,
+      this.transform.up
+    );
+    this.transform.rotation = rotation;
     var dir = this.transform.localRotation * Vector3.forward;
     var dist = Vector3.Distance(
       this.transform.position,

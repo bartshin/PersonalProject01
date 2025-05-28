@@ -23,8 +23,9 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
     }
   }
   Action<BorneCraftProjectile> onDisabled;
-  Vector3 targetPosition;
+  public int Damage;
   public float Speed;
+  Vector3 targetPosition;
   Vector3 dir;
 
   // Start is called before the first frame update
@@ -53,7 +54,19 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
 
   void OnTriggerEnter(Collider collider)
   {
-    Debug.Log("hit");
+    IDamagable damagable = null;
+    if (collider.gameObject == CombatManager.Shared.LastHitEnemy.gameObject) {
+      damagable = CombatManager.Shared.LastHitEnemy.damagable;
+    }
+    else {
+      damagable = collider.GetComponent<IDamagable>();
+      if (damagable != null) {
+        CombatManager.Shared.LastHitEnemy = (collider.gameObject, damagable);
+      }
+    }
+    if (damagable != null) {
+      damagable.TakeDamage(this.Damage);
+    }
     this.gameObject.SetActive(false);
   }
 }
