@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,8 +15,12 @@ public class EnemyShip : MonoBehaviour
   ShipHealth health;
   [SerializeField]
   SphereCollider detectTrigger;
+  [SerializeField]
+  GameObject projectile;
 
   [Header("Configs")]
+  [SerializeField]
+  EnemyShipMovement.State initialState;
   [SerializeField]
   float distToStopChase;
   [SerializeField]
@@ -30,7 +34,13 @@ public class EnemyShip : MonoBehaviour
   [SerializeField]
   float chasingTimeWhenAttacked;
   [SerializeField]
-  EnemyShipMovement.State initialState;
+  float shootRange;
+  [SerializeField]
+  float shootDelay;
+  [SerializeField]
+  int shootDamage;
+  [SerializeField]
+  float projectileSpeed;
 
   EnemyShipAttack attack;
   EnemyShipMovement movement;
@@ -60,7 +70,25 @@ public class EnemyShip : MonoBehaviour
 
   EnemyShipAttack InitAttack()
   {
-    return (new EnemyShipAttack());
+    var attack = new EnemyShipAttack( 
+      ship: this.gameObject,
+      projectilePrefab: this.projectile,
+      configs: this.CreateAttackConfigs()
+    );
+    if (this.target != null) {
+      attack.SetTarget(this.target.GetComponent<IDamagable>());
+    }
+    return (attack);
+  }
+
+  EnemyShipAttack.Configs CreateAttackConfigs()
+  {
+    return (new EnemyShipAttack.Configs {
+      ShootDelay = this.shootDelay,
+      ShootRange = this.shootRange,
+      ShootDamage = this.shootDamage,
+      ProjectileSpeed = this.projectileSpeed,
+    });
   }
 
   EnemyShipMovement InitMovement()
@@ -87,13 +115,11 @@ public class EnemyShip : MonoBehaviour
     });
   }
 
-  // Start is called before the first frame update
   void Start()
   {
     this.health.OnTakeDamage += this.OnTakeDamage;
   }
 
-  // Update is called once per frame
   void Update()
   {
     this.UpdateTargetDistance();
@@ -107,6 +133,12 @@ public class EnemyShip : MonoBehaviour
       this.movement.configs = this.CreateMovementConfigs();
       if (this.target != null ) {
         this.movement.SetTarget(this.target.transform);
+      }
+    }
+    if (this.attack != null) {
+      this.attack.configs = this.CreateAttackConfigs();
+      if (this.target != null) {
+        this.attack.SetTarget(this.target.GetComponent<IDamagable>());
       }
     }
     if (this.detectTrigger != null) {
@@ -149,6 +181,7 @@ public class EnemyShip : MonoBehaviour
       this.targetDistance = float.MaxValue;
     }
     this.movement.TargetDistance = this.targetDistance;
+    this.attack.TargetDistance = this.targetDistance;
   }
 
   void OnTakeDamage(int damage, Transform attacker)
@@ -156,6 +189,7 @@ public class EnemyShip : MonoBehaviour
     if (this.target == null) {
       this.target = attacker.gameObject;
       this.movement.StartChasing(this.target.transform);
+      this.attack.SetTarget(this.target.GetComponent<IDamagable>());
     }
   }
 }

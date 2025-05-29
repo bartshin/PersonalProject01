@@ -558,7 +558,6 @@ GameObject:
   - component: {fileID: 148171103}
   - component: {fileID: 148171102}
   - component: {fileID: 148171101}
-  - component: {fileID: 148171104}
   m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
@@ -631,29 +630,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 605610267}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &148171104
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 148171097}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -981,6 +957,7 @@ GameObject:
   - component: {fileID: 605610269}
   - component: {fileID: 605610268}
   - component: {fileID: 605610270}
+  - component: {fileID: 605610271}
   m_Layer: 6
   m_Name: Mother Ship
   m_TagString: Untagged
@@ -1067,8 +1044,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 1000
-  defense: 10
+  defense: 1
+  WaitToDestroy: 4
   maxBarrier: 0
+--- !u!136 &605610271
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605610266}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &804889799
 GameObject:
   m_ObjectHideFlags: 0
@@ -1143,6 +1144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   defense: 0
+  WaitToDestroy: 4
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1326,6 +1328,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   defense: 0
+  WaitToDestroy: 4
 --- !u!1 &1966302244
 GameObject:
   m_ObjectHideFlags: 0
@@ -1476,6 +1479,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 100
   defense: 2
+  WaitToDestroy: 4
 --- !u!114 &1966302251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1493,13 +1497,19 @@ MonoBehaviour:
   target: {fileID: 0}
   health: {fileID: 1966302250}
   detectTrigger: {fileID: 1966302252}
-  distToStopChase: 10
+  projectile: {fileID: 6704381560025226224, guid: 331227b141a070f6fae0783ea5313467,
+    type: 3}
+  initialState: 3
+  distToStopChase: 20
   distToStartChase: 30
-  detectRange: 10
-  acceleration: 1
+  detectRange: 20
+  acceleration: 2
   maxSpeed: 5
   chasingTimeWhenAttacked: 5
-  initialState: 3
+  shootRange: 30
+  shootDelay: 0.5
+  shootDamage: 4
+  projectileSpeed: 40
 --- !u!135 &1966302252
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1519,7 +1529,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 10
+  m_Radius: 20
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2050207634
 GameObject:
@@ -1595,6 +1605,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 50
   defense: 0
+  WaitToDestroy: 4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

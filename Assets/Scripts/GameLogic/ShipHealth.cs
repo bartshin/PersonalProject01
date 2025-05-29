@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Architecture;
@@ -12,6 +13,7 @@ public class ShipHealth : MonoBehaviour, IDamagable
   protected int defense;
   public Action<ShipHealth> OnDestroyed;
   public Action<int, Transform> OnTakeDamage;
+  public float WaitToDestroy = 4f;
   Action<IDamagable> IDamagable.OnDestroyed 
   { 
     get => this.OnDestroyed as Action<IDamagable>; 
@@ -72,6 +74,13 @@ public class ShipHealth : MonoBehaviour, IDamagable
     if (this.OnDestroyed != null) {
       this.OnDestroyed(this);
     }
-    Destroy(this.gameObject);
+    this.gameObject.SetActive(false);
+    this.StartCoroutine(this.DestorySelf());
+  }
+
+  protected IEnumerator DestorySelf()
+  {
+    yield return (new WaitForSeconds(this.WaitToDestroy));
+    Destroy (this.gameObject);
   }
 }

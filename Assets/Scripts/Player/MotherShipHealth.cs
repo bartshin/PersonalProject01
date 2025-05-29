@@ -29,4 +29,15 @@ public class MotherShipHealth : ShipHealth
   {
 
   }
+
+  public override int TakeDamage(int attackDamage, Transform attacker)
+  {
+    Debug.Log($"player take damage: {attackDamage} hp: {this.Hp.Value.current}");
+    return base.TakeDamage(attackDamage, attacker);
+  }
+
+  protected override void OnRunoutHp()
+  {
+    Debug.Log("player died");
+  }
 }

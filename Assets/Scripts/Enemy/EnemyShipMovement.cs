@@ -101,12 +101,11 @@ public class EnemyShipMovement
         this.CurrentState = State.ChasingTarget;
       }
     }
-    else if (this.CurrentState == State.ChasingTarget && 
-        this.remainingChasingTime < 0) {
+    else if (this.CurrentState == State.ChasingTarget ) {
       if (this.TargetDistance < this.configs.ChasingRange.min) {
         this.CurrentState = State.HoldingPosition;
       }
-      else {
+      else if (this.remainingChasingTime < 0) {
         this.CurrentState = State.Patrol;
       }
     }
@@ -138,7 +137,7 @@ public class EnemyShipMovement
     this.rb.velocity = Vector3.Lerp(
       this.rb.velocity,
       Vector3.zero,
-      2f * deltaTime
+      10f * deltaTime
     );
   }
 
