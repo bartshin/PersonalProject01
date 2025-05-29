@@ -25,7 +25,7 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   ShipHealth health;
 
-  [Header("Configs")]
+  [Header("Movement Configs")]
   [SerializeField]
   float speed;
   [SerializeField]
@@ -33,9 +33,15 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   float maxMoveAngle;
   [SerializeField]
-  float maxShootAngle;
-  [SerializeField]
   float prepareSortieTime;
+  [SerializeField]
+  float waitOffset;
+  [SerializeField]
+  float maxDistToSortie;
+
+  [Header("Attack Configs")]
+  [SerializeField]
+  float maxShootAngle;
   [SerializeField]
   float shootRange;
   [SerializeField]
@@ -43,11 +49,7 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   int shootDamage;
   [SerializeField]
-  float waitOffset;
-  [SerializeField]
   float projectileSpeed;
-  [SerializeField]
-  float maxDistToSortie;
   public Configs CraftConfigs 
   {
     get => this.configs;

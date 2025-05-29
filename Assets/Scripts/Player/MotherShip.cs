@@ -6,13 +6,16 @@ using Cinemachine;
 public class MotherShip : MonoBehaviour
 {
   [Header("References")]
-  public GameObject[] bornCraftPrefabs;
-  [SerializeField]
-  BorneCraft.Configs[] bornCraftConfigs;
   [SerializeField]
   Rigidbody rb;
+  [SerializeField]
+  GameObject sideAttackProjectilePrefab;
 
-  [Header("Configs")]
+  [Header("BorneCraft")]
+  public GameObject[] bornCraftPrefabs;
+  public BorneCraft.Configs[] bornCraftConfigs;
+
+  [Header("Movement Configs")]
   [SerializeField]
   float turningSpeed;
   [SerializeField]
@@ -34,7 +37,18 @@ public class MotherShip : MonoBehaviour
   [SerializeField]
   float boosterConsume;
 
+  [Header("Sideattack Configs")]
+  [SerializeField]
+  float sideAttackDelay;
+  [SerializeField]
+  float sideAttackProjectileSpeed;
+  [SerializeField]
+  float sideAttackPower;
+  [SerializeField]
+  float sideAttackProjectileLifeTime;
+
   MotherShipMovement movement;
+  MotherShipSideAttack sideAttack;
   List<BorneCraft> borneCrafts;
   IDamagable currentCraftTarget;
 
@@ -44,6 +58,7 @@ public class MotherShip : MonoBehaviour
       this.rb = this.GetComponent<Rigidbody>();
     }
     this.movement = this.InitMovement();
+    this.sideAttack = this.InitSideAttack();
     this.InitBornCrafts();
   }
 
@@ -67,17 +82,37 @@ public class MotherShip : MonoBehaviour
     return (craft);
   }
 
+  MotherShipSideAttack InitSideAttack()
+  {
+    var sideAttack = new MotherShipSideAttack(
+      ship: this.transform,
+      projectilePrefab: this.sideAttackProjectilePrefab,
+      configs: this.CreateSideAttackConfigs()
+    );
+    return (sideAttack); 
+  }
+
+  MotherShipSideAttack.Configs CreateSideAttackConfigs()
+  {
+    return (new MotherShipSideAttack.Configs {
+      Delay = this.sideAttackDelay,
+      Power = this.sideAttackPower,
+      ProjectileSpeed = this.sideAttackProjectileSpeed,
+      LifeTime = this.sideAttackProjectileLifeTime,
+    });
+  }
+
   MotherShipMovement InitMovement()
   {
     return (new MotherShipMovement(
       rigidbody: this.rb,
       transform: this.transform,
-      configs: this.CreateConfigs()
+      configs: this.CreateMovementConfigs()
      )
     );
   }
 
-  MotherShipMovement.Configs CreateConfigs()
+  MotherShipMovement.Configs CreateMovementConfigs()
   {
     return (new MotherShipMovement.Configs {
       TurningSpeed = this.turningSpeed,
@@ -95,20 +130,36 @@ public class MotherShip : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+  }
+
+  void OnEnable()
+  {
     CombatManager.Shared.SelectedEnemy.OnChanged += this.OnSelectedEnemyChanged;
+    CameraManager.Shared.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
     CameraManager.Shared.SetPlayerShip(this.transform);
+  }
+
+  void OnDisable()
+  {
+    CombatManager.Shared.SelectedEnemy.OnChanged -= this.OnSelectedEnemyChanged;
+    CameraManager.Shared.ActiveSideCamera.OnChanged -= this.OnSideCameraChanged;
+    CameraManager.Shared.UnsetPlayerShip();
   }
 
   // Update is called once per frame
   void Update()
   {
     this.movement.Update(Time.deltaTime);
+    this.sideAttack.Update(Time.deltaTime);
   }
 
   void OnValidate()
   {
     if (this.movement != null) {
-      this.movement.configs = this.CreateConfigs();
+      this.movement.configs = this.CreateMovementConfigs();
+    }
+    if (this.sideAttack != null) {
+      this.sideAttack.configs = this.CreateSideAttackConfigs();
     }
   }
 
@@ -148,5 +199,20 @@ public class MotherShip : MonoBehaviour
       this.OnEnemyDeselected();
       enemy.OnDestroyed -= this.OnEnemyDestroyed;
     }
+  }
+
+  void OnSideCameraChanged(Nullable<Direction> direction) 
+  {
+    UserInputManager.Shared.IsTrackingMouse = direction != null;
+    if (direction != null) {
+      if (direction.Value == Direction.Left) {
+        this.sideAttack.AimDirection = Quaternion.LookRotation(this.transform.right * -1f);
+      }
+      else {
+        this.sideAttack.AimDirection = Quaternion.LookRotation(this.transform.right);
+      }
+      this.sideAttack.AttackDirection = direction.Value;
+    }
+    this.sideAttack.IsActive = direction != null;
   }
 }

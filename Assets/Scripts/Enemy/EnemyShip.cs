@@ -18,7 +18,7 @@ public class EnemyShip : MonoBehaviour
   [SerializeField]
   GameObject projectile;
 
-  [Header("Configs")]
+  [Header("Movement Configs")]
   [SerializeField]
   EnemyShipMovement.State initialState;
   [SerializeField]
@@ -33,6 +33,8 @@ public class EnemyShip : MonoBehaviour
   float maxSpeed;
   [SerializeField]
   float chasingTimeWhenAttacked;
+
+  [Header("Attack Configs")]
   [SerializeField]
   float shootRange;
   [SerializeField]

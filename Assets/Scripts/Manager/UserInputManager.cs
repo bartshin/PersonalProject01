@@ -7,8 +7,10 @@ using Architecture;
 public class UserInputManager : SingletonBehaviour<UserInputManager>
 {
   public ObservableValue<Nullable<Vector2>> SelectedAttackPosition;
-  public Vector3 DirectionInput;
-  public bool IsBoosting;
+  public Vector3 DirectionInput { get; private set; }
+  public Vector2 MouseDelta { get; private set; }
+  public bool IsBoosting { get; private set; }
+  public bool IsTrackingMouse;
   InputAction move;
   InputAction attack;
   InputAction speedUp;
@@ -32,6 +34,9 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
   {
     if (this.attack.WasPressedThisFrame()) {
       this.SelectedAttackPosition.Value = Mouse.current.position.ReadValue();
+    }
+    if (this.IsTrackingMouse) {
+      this.MouseDelta = Mouse.current.delta.ReadValue();
     }
     this.DirectionInput = this.move.ReadValue<Vector3>();
     this.IsBoosting = this.speedUp.IsPressed();

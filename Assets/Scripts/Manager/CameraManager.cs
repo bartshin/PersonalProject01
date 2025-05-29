@@ -6,12 +6,13 @@ using Cinemachine;
 
 public class CameraManager : SingletonBehaviour<CameraManager>
 {
-  public enum SideCameraDirection
+  new public static void CreateInstance()  
   {
-    Left,
-    Right
+    GameObject prefab = Resources.Load<GameObject>("Prefabs/CameraManager"); 
+    var gameObject = Instantiate(prefab);
+    DontDestroyOnLoad(gameObject);
   }
-  public ObservableValue<Nullable<SideCameraDirection>> ActiveSideCamera; 
+  public ObservableValue<Nullable<Direction>> ActiveSideCamera; 
   [SerializeField]
   public Vector3 TopviewLookAtOffsetDest
   {
@@ -31,7 +32,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   [SerializeField]
   Transform topviewLookAt;
   [SerializeField]
-  Transform sideviewFollow;
+  Transform sideviewLookAt;
   [SerializeField]
   Vector3 topviewFollowOffset;
   Transform playerShip;
@@ -40,13 +41,14 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   [SerializeField]
   float topviewLookAtOffsetThreshold;
   Vector3 topviewLookAtOffsetDest;
+  Quaternion sideviewDirDest;
   bool isLookAtOffsetMoving;
   int playershipMask;
+  float sideviewRadius = 10f;
 
   void Awake()
   {
     base.OnAwake();
-
     this.playershipMask = (1 << LayerMask.NameToLayer("Player"));
     this.ActiveSideCamera = new (null);
     this.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
@@ -62,31 +64,44 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   public void SetPlayerShip(Transform player)
   {
     this.playerShip = player;
+    this.sideviewCamera.Follow = player;
   }
 
   public void UnsetPlayerShip()
   {
     this.playerShip = null;
+    this.sideviewCamera.Follow = null;
+  }
+
+  public void SetSideViewDir(Quaternion dir)
+  {
+    this.sideviewDirDest = dir;
   }
 
   void Update()
   {
+    if (this.ActiveSideCamera.Value != null && this.playerShip != null) {
+      this.sideviewLookAt.position = this.playerShip.position +
+        this.sideviewDirDest * Vector3.forward;
+      this.sideviewLookAt.rotation = this.sideviewDirDest;
+    }
+    //FIXME: Make UI**********/
     if (Input.GetKeyDown(KeyCode.Alpha1)) {
-      this.ActiveSideCamera.Value = SideCameraDirection.Left;
+      this.ActiveSideCamera.Value = Direction.Left;
     }
     if (Input.GetKeyDown(KeyCode.Alpha2)) {
-      this.ActiveSideCamera.Value = SideCameraDirection.Right;
+      this.ActiveSideCamera.Value = Direction.Right;
     }
     if (Input.GetKeyDown(KeyCode.Alpha3)) {
       this.ActiveSideCamera.Value = null;
     }
+    /*************************/
   }
 
   void LateUpdate()
   {
     if (this.playerShip != null) {
       var playerPosition = this.playerShip.position;
-      this.sideviewFollow.position = playerPosition;
       this.topviewFollow.position = playerPosition + this.topviewFollowOffset;
       if (!this.isLookAtOffsetMoving) {
         this.topviewLookAt.position = new Vector3( 
@@ -132,7 +147,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
     }
   }
 
-  void SetCullingMask(Nullable<SideCameraDirection> activeSideCamera)
+  void SetCullingMask(Nullable<Direction> activeSideCamera)
   {
     var currentMask = Camera.main.cullingMask;
     if (activeSideCamera == null) {
@@ -143,15 +158,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
     }
   }
 
-  void SetSideCameraRotation(SideCameraDirection direction)
-  {
-    this.sideviewFollow.LookAt(
-      this.playerShip.right * 
-      (direction == SideCameraDirection.Left ? -1f: 1f)
-    );
-  }
-
-  void WillSideCameraChanged(Nullable<SideCameraDirection> activeSide)
+  void WillSideCameraChanged(Nullable<Direction> activeSide)
   {
     if (activeSide != null) {
       this.sideviewCamera.Priority = 0;
@@ -159,12 +166,9 @@ public class CameraManager : SingletonBehaviour<CameraManager>
     }
   }
 
-  void OnSideCameraChanged(Nullable<SideCameraDirection> activeSide)
+  void OnSideCameraChanged(Nullable<Direction> activeSide)
   {
     this.sideviewCamera.Priority = activeSide != null ? 2: 0;
     this.SetCullingMask(activeSide);
-    if (activeSide != null && this.playerShip != null) {
-      this.SetSideCameraRotation(activeSide.Value);
-    }
   }
 }

@@ -19,12 +19,6 @@ namespace Architecture
       }
     }
 
-    public static void Create()
-    {
-      SingletonBehaviour<T>.instance = FindObjectOfType<T>() ?? 
-        SingletonBehaviour<T>.CreateInstance();
-    }
-
     protected static T CreateInstance() 
     {
       var gameObject = new GameObject(typeof(T).Name);
