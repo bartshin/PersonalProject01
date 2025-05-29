@@ -41,5 +41,10 @@ namespace Architecture
         Destroy(this.gameObject);
       }
     }
+
+    protected void OnDestroyed()
+    {
+      SingletonBehaviour<T>.instance = null;
+    }
   }
 }

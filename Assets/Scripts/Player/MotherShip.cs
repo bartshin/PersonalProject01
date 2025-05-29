@@ -1,11 +1,14 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class MotherShip : MonoBehaviour
 {
   [Header("References")]
   public GameObject[] bornCraftPrefabs;
+  [SerializeField]
+  BorneCraft.Configs[] bornCraftConfigs;
   [SerializeField]
   Rigidbody rb;
 
@@ -47,17 +50,20 @@ public class MotherShip : MonoBehaviour
   void InitBornCrafts()
   {
     this.borneCrafts = new ();
-    foreach (var prefab in this.bornCraftPrefabs) {
-      this.borneCrafts.Add(this.SpawnBornCraft(prefab)); 
-    } 
+    for (int i = 0; i < this.bornCraftPrefabs.Length; ++i) {
+      this.borneCrafts.Add(
+        this.SpawnBornCraft(
+          this.bornCraftPrefabs[i], this.bornCraftConfigs[i])); 
+    }
   }
 
-  BorneCraft SpawnBornCraft(GameObject prefab)
+  BorneCraft SpawnBornCraft(GameObject prefab, BorneCraft.Configs configs)
   {
     var gameObject = Instantiate(prefab);
     gameObject.transform.parent = this.transform;
     gameObject.transform.position = this.transform.position;
     var craft = gameObject.GetComponent<BorneCraft>();
+    craft.CraftConfigs = configs;
     return (craft);
   }
 
@@ -89,7 +95,8 @@ public class MotherShip : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnEnemySelected;
+    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnSelectedEnemyChanged;
+    CameraManager.Shared.SetPlayerShip(this.transform);
   }
 
   // Update is called once per frame
@@ -105,7 +112,14 @@ public class MotherShip : MonoBehaviour
     }
   }
 
-  void OnEnemySelected(IDamagable enemy) 
+  void OnDestroy()
+  {
+    if (CameraManager.Shared != null) {
+      CameraManager.Shared.UnsetPlayerShip();
+    }
+  }
+
+  void OnSelectedEnemyChanged(IDamagable enemy) 
   {
     if (enemy != null) {
       if (this.currentCraftTarget != null) {

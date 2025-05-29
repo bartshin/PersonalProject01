@@ -15,7 +15,7 @@ namespace Architecture
             this.WillChange(this.innerValue);
           }
           this.innerValue = value;
-          if (this.OnChanged != null && value != null) {
+          if (this.OnChanged != null) {
             this.OnChanged.Invoke(value);
           }
         }

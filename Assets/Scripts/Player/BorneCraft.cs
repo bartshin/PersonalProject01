@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class BorneCraft : MonoBehaviour
 {
+  [Serializable]
+  public class Configs
+  {
+    public float RotateAngle;   
+    public float WaitOffset;
+  }
+
   [Header("References")]
   [SerializeField]
   GameObject ship;
@@ -41,6 +48,20 @@ public class BorneCraft : MonoBehaviour
   float projectileSpeed;
   [SerializeField]
   float maxDistToSortie;
+  public Configs CraftConfigs 
+  {
+    get => this.configs;
+    set {
+      this.configs = value;
+      if (value != null) {
+        this.transform.rotation = Quaternion.identity;
+        this.transform.Rotate(
+          new Vector3(0, 0, this.configs.RotateAngle));
+        this.waitOffset = this.configs.WaitOffset;
+      }
+    }
+  }
+  Configs configs;
 
   BorneCraftMovement movement;
   BorneCraftAttack attack;

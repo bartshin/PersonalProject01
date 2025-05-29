@@ -16,7 +16,11 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     this.SelectedEnemy = new (null);
     this.LastHitEnemy = (null, null);
     this.SelectedEnemy.WillChange += (enemy) => enemy.OnDestroyed -= this.OnEnemyDestroyed;
-    this.SelectedEnemy.OnChanged += (enemy) => enemy.OnDestroyed += this.OnEnemyDestroyed;
+    this.SelectedEnemy.OnChanged += (enemy) => {
+      if (enemy != null) {
+        enemy.OnDestroyed += this.OnEnemyDestroyed;
+      }
+    };
   }
 
   // Start is called before the first frame update
