@@ -22,18 +22,27 @@ public class ShipHealth : MonoBehaviour, IDamagable
     }
   }
 
+  public Action<IDamagable> OnDisabled { get; set; }
+
   public ObservableValue<(int current, int max)> Hp;
 
 
-    protected virtual void Awake()
+  protected virtual void Awake()
   {
+    IDamagable.Register(this.gameObject, this);
     this.Hp = new((this.maxHp, this.maxHp));
   }
 
-  // Update is called once per frame
   protected virtual void Update()
   {
 
+  }
+
+  protected virtual void OnDisable()
+  {
+    if (this.OnDisabled != null) {
+      this.OnDisabled.Invoke(this);
+    }
   }
 
   public virtual int TakeDamage(int attackDamage)
@@ -74,12 +83,12 @@ public class ShipHealth : MonoBehaviour, IDamagable
     if (this.OnDestroyed != null) {
       this.OnDestroyed(this);
     }
-    this.gameObject.SetActive(false);
     this.StartCoroutine(this.DestorySelf());
   }
 
   protected IEnumerator DestorySelf()
   {
+    this.gameObject.SetActive(false);
     yield return (new WaitForSeconds(this.WaitToDestroy));
     Destroy (this.gameObject);
   }

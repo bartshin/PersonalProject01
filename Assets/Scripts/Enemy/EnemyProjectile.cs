@@ -70,13 +70,13 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
 
   void OnTriggerEnter(Collider collider)
   {
-    Debug.Log($"hit: {collider.gameObject.name} target:{this.target}");
     IDamagable damagable = null;
     if (collider.gameObject == this.Target.gameObject) {
       damagable = this.Target;
     }
     else {
-      damagable = collider.GetComponent<IDamagable>();
+      damagable = IDamagable.GetDamagable(collider.gameObject) ??
+        IDamagable.FindIDamagableFrom(collider.gameObject);
     }
     if (damagable != null) {
       damagable.TakeDamage(this.Damage, this.FiredShip.transform);

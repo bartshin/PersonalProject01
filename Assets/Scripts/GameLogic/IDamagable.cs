@@ -9,14 +9,21 @@ public interface IDamagable
   public int TakeDamage(int attackDamage);
   public int TakeDamage(int attackDamage, Transform attacker);
   public Action<IDamagable> OnDestroyed { get; set; }
+  public Action<IDamagable> OnDisabled { get; set; }
   public GameObject gameObject { get; }
 
-  virtual protected void Register(GameObject gameObject) {
-    if (!IDamagable.damagables.TryAdd(
-        gameObject, this
-        )) {
-
+  protected static void Register(GameObject gameObject, IDamagable damagable) {
+    if (!IDamagable.damagables.TryAdd(gameObject, damagable)) {
+      Debug.LogError($"Duplicate damagable for {gameObject.name}");
     }
+  }
+
+  public static IDamagable GetDamagable(GameObject gameObject)
+  {
+    if (IDamagable.damagables.TryGetValue(gameObject, out IDamagable damagable)) {
+      return (damagable);
+    }
+    return (null);
   }
 
   static IDamagable FindIDamagableFrom(GameObject gameObject)

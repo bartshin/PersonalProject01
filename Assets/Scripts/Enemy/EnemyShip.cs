@@ -118,6 +118,7 @@ public class EnemyShip : MonoBehaviour
   void Start()
   {
     this.health.OnTakeDamage += this.OnTakeDamage;
+    this.health.OnDestroyed += this.OnDestroyed;
   }
 
   void Update()
@@ -151,17 +152,19 @@ public class EnemyShip : MonoBehaviour
     if (collider.gameObject.layer == this.playerMotherShipLayer ||
         (this.target == null && 
          collider.gameObject.layer == this.playerBorneCraftLayer)) {
-      this.target = collider.gameObject;
-      this.movement.StartChasing(this.target.transform);
-      this.attack.SetTarget(this.target.GetComponent<IDamagable>());
+      var damagable = collider.gameObject.GetComponent<IDamagable>();
+      if (damagable != null) {
+        this.StartCombatWith(damagable);
+      }
     }
   }
 
   void RemoveTarget()
   {
-    if (this.movement != null) {
-      this.movement.RemoveTarget();
-    }
+    this.target = null;
+    this.movement.RemoveTarget();
+    this.attack.RemoveTarget();
+    this.targetDistance = float.MaxValue;
   }
 
   void UpdateTargetDistance()
@@ -172,9 +175,7 @@ public class EnemyShip : MonoBehaviour
         this.target.transform.position
       );
       if (!this.target.activeSelf) {
-        this.target = null;
         this.RemoveTarget();
-        this.targetDistance = float.MaxValue;
       }
     }
     else {
@@ -186,10 +187,32 @@ public class EnemyShip : MonoBehaviour
 
   void OnTakeDamage(int damage, Transform attacker)
   {
-    if (this.target == null) {
-      this.target = attacker.gameObject;
-      this.movement.StartChasing(this.target.transform);
-      this.attack.SetTarget(this.target.GetComponent<IDamagable>());
+    var attackerDamagble = attacker.gameObject.GetComponent<IDamagable>();
+    if (this.target == null && attackerDamagble != null) {
+      this.StartCombatWith(attackerDamagble);
     }
+  }
+
+  void StartCombatWith(IDamagable target)
+  {
+    this.target = target.gameObject;
+    this.movement.StartChasing(this.target.transform);
+    this.attack.SetTarget(target);
+    target.OnDisabled += this.FinishCombatWith;
+    target.OnDestroyed += this.FinishCombatWith;
+  }
+
+  void FinishCombatWith(IDamagable target)
+  {
+    if (this.target == target.gameObject) {
+      this.RemoveTarget();
+      target.OnDestroyed -= this.FinishCombatWith;
+      target.OnDisabled -= this.FinishCombatWith;
+    }
+  }
+
+  void OnDestroyed(ShipHealth health)
+  {
+    this.RemoveTarget();
   }
 }

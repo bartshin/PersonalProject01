@@ -9,18 +9,19 @@ public class BorneCraftAttack
   {
     public float ShootDelay;
     public int Damage;
+    public float ProjectileSpeed;
   }
 
   public Action OnShoot;
   public Configs configs;
   float remainDelay;
-  Transform body;
+  GameObject ship;
   Transform targetTransform;
   MonoBehaviourPool<BorneCraftProjectile> projectilePool;
 
-  public BorneCraftAttack(Transform body, GameObject projectile, Configs configs)
+  public BorneCraftAttack(GameObject ship, GameObject projectile, Configs configs)
   {
-    this.body = body;
+    this.ship = ship;
     this.configs = configs;
     this.projectilePool = new (
       poolSize: 20,
@@ -34,8 +35,9 @@ public class BorneCraftAttack
     this.targetTransform = transform;
   }
 
-  public void Reset()
+  public void RemoveTarget()
   {
+    this.targetTransform = null;
   }
 
   public void Update(float deltaTime)
@@ -52,9 +54,9 @@ public class BorneCraftAttack
   void Shoot() 
   {
     var projectile = this.projectilePool.Get();
-    projectile.transform.position = this.body.position;
-    projectile.FiredShip = this.body.gameObject;
-    projectile.Speed = 20f;
+    projectile.transform.position = this.ship.transform.position;
+    projectile.FiredShip = this.ship;
+    projectile.Speed = this.configs.ProjectileSpeed;
     projectile.Damage = this.configs.Damage;
     projectile.TargetPosition = this.targetTransform.position;
     if (this.OnShoot != null) {

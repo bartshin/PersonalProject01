@@ -8,6 +8,7 @@ public class MotherShipMovement
   {
     public Vector2 Moving;
     public float Altitude;
+    public bool IsBoosting;
     public bool IsTuring => Math.Abs(this.Moving.x) > float.Epsilon;
     public bool IsAccelerating => Math.Abs(this.Moving.y) > float.Epsilon;
     public bool IsChaningAltitude => Math.Abs(this.Altitude) > float.Epsilon;
@@ -15,32 +16,47 @@ public class MotherShipMovement
 
   public struct Configs
   {
-    public float turningSpeed;
-    public float acceleration;
-    public float verticalAcceleration;
-    public float maxSpeed;
-    public float maxVerticalSpeed;
-    public float angularVelocityThreshold;
-    public float angularVelocityDecreseRatio;
+    public float TurningSpeed;
+    public float Acceleration;
+    public float VerticalAcceleration;
+    public float MaxSpeed;
+    public float MaxVerticalSpeed;
+    public float AngularVelocityThreshold;
+    public float AngularVelocityDecreseRatio;
+    public float BoosterPower;
+    public float BoosterRestore;
+    public float BoosterConsume;
   }
 
+  public Configs configs;
   Rigidbody rb;
   Transform transform;
-  public Configs configs;
-
-  KeyCode upwardKey = KeyCode.E;
-  KeyCode downwardKey = KeyCode.Q;
+  float currentBooster;
+  bool isBoosting;
+  float minBoostingGauge = 10f;
 
   public MotherShipMovement(Rigidbody rigidbody, Transform transform, Configs configs)
   {
     this.rb = rigidbody;
     this.transform = transform;
     this.configs = configs;
+    this.isBoosting = false;
+    this.currentBooster = 50f;
   }
 
   public void Update(float deltaTime)
   {
     UserInput input = this.GetInput(); 
+    this.isBoosting = input.IsBoosting && this.currentBooster > this.minBoostingGauge;
+    if (!this.isBoosting) {
+      this.currentBooster = Math.Min(this.currentBooster + this.configs.BoosterRestore * Time.deltaTime, 100f);
+    }
+    else {
+      this.currentBooster = Math.Max(this.currentBooster - this.configs.BoosterConsume * Time.deltaTime, 0f);
+      if (this.currentBooster < 0) {
+        this.isBoosting = false;
+      }
+    }
     this.UpdateDirection(input.IsTuring, input.Moving.x, deltaTime);
     if (input.IsAccelerating) {
       this.Move(input.Moving.y, deltaTime);
@@ -52,10 +68,14 @@ public class MotherShipMovement
 
   void Move(float acceleratingInput, float deltaTime)
   {
-    this.rb.velocity += this.transform.forward * acceleratingInput * this.configs.acceleration * deltaTime;
+    var acceleration = this.configs.Acceleration;
+    if (this.isBoosting) {
+      acceleration += this.configs.BoosterPower;
+    }
+    this.rb.velocity += this.transform.forward * acceleratingInput * acceleration * deltaTime;
     var velocity = new Vector2(this.rb.velocity.x, this.rb.velocity.z);
-    if (velocity.magnitude > this.configs.maxSpeed) {
-      velocity *= this.configs.maxSpeed / this.rb.velocity.magnitude;
+    if (!this.isBoosting && velocity.magnitude > this.configs.MaxSpeed) {
+      velocity *= this.configs.MaxSpeed / this.rb.velocity.magnitude;
       this.rb.velocity = new Vector3(
         velocity.x, this.rb.velocity.y, velocity.y);
     }
@@ -65,7 +85,7 @@ public class MotherShipMovement
   {
     if (isTurning) {
       this.rb.angularVelocity += new Vector3(
-          0, directionInput * this.configs.turningSpeed * deltaTime, 0);
+          0, directionInput * this.configs.TurningSpeed * deltaTime, 0);
     }
     if (this.rb.angularVelocity.magnitude > float.Epsilon) {
       this.ForceMoveFoward();
@@ -77,14 +97,14 @@ public class MotherShipMovement
 
   void UpdateAltitude(float altitudeInput, float deltaTime)
   {
-    this.rb.velocity += this.transform.up * altitudeInput * this.configs.verticalAcceleration * deltaTime;
-    if (Math.Abs(this.rb.velocity.y) > this.configs.maxVerticalSpeed) {
+    this.rb.velocity += this.transform.up * altitudeInput * this.configs.VerticalAcceleration * deltaTime;
+    if (Math.Abs(this.rb.velocity.y) > this.configs.MaxVerticalSpeed) {
       this.rb.velocity = new Vector3(
         this.rb.velocity.x,
         Math.Clamp(
           this.rb.velocity.y, 
-          -this.configs.maxVerticalSpeed,
-          this.configs.maxVerticalSpeed
+          -this.configs.MaxVerticalSpeed,
+          this.configs.MaxVerticalSpeed
           ),
         this.rb.velocity.z
       );
@@ -101,11 +121,11 @@ public class MotherShipMovement
 
   void DecreseAngularVelocity(float deltaTime)
   {
-    if (this.rb.angularVelocity.magnitude > this.configs.angularVelocityThreshold) {
+    if (this.rb.angularVelocity.magnitude > this.configs.AngularVelocityThreshold) {
       this.rb.angularVelocity = Vector3.Lerp(
         this.rb.angularVelocity,
         Vector3.zero,
-        this.configs.angularVelocityDecreseRatio * deltaTime);
+        this.configs.AngularVelocityDecreseRatio * deltaTime);
     }
     else {
       this.rb.angularVelocity = Vector3.zero;
@@ -119,12 +139,17 @@ public class MotherShipMovement
       Input.GetAxisRaw("Vertical")
     );
     float altitude = 0f;
-    if (Input.GetKey(this.upwardKey)) {
+    if (Input.GetKey(InputSettings.IncreseMotherShipAltiudeKey)) {
       altitude += 1f;
     }
-    if (Input.GetKey(this.downwardKey)) {
+    if (Input.GetKey(InputSettings.DecreseMotherShipAltiudeKey)) {
       altitude -= 1f; 
     }
-    return (new UserInput{ Moving = movingInput, Altitude = altitude });
+    bool isBoosting = Input.GetKey(InputSettings.MotherShipAltiudeBoosterKey);
+    return (new UserInput{ 
+      Moving = movingInput,
+      Altitude = altitude,
+      IsBoosting = isBoosting
+    });
   }
 }

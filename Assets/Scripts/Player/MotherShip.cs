@@ -5,6 +5,7 @@ using UnityEngine;
 public class MotherShip : MonoBehaviour
 {
   [Header("References")]
+  public GameObject[] bornCraftPrefabs;
   [SerializeField]
   Rigidbody rb;
 
@@ -23,8 +24,16 @@ public class MotherShip : MonoBehaviour
   float angularVelocityThreshold;
   [SerializeField]
   float angularVelocityDecreseRatio;
+  [SerializeField]
+  float boosterPower;
+  [SerializeField]
+  float boosterRestore;
+  [SerializeField]
+  float boosterConsume;
 
   MotherShipMovement movement;
+  List<BorneCraft> borneCrafts;
+  IDamagable currentCraftTarget;
 
   void Awake()
   {
@@ -32,6 +41,24 @@ public class MotherShip : MonoBehaviour
       this.rb = this.GetComponent<Rigidbody>();
     }
     this.movement = this.InitMovement();
+    this.InitBornCrafts();
+  }
+
+  void InitBornCrafts()
+  {
+    this.borneCrafts = new ();
+    foreach (var prefab in this.bornCraftPrefabs) {
+      this.borneCrafts.Add(this.SpawnBornCraft(prefab)); 
+    } 
+  }
+
+  BorneCraft SpawnBornCraft(GameObject prefab)
+  {
+    var gameObject = Instantiate(prefab);
+    gameObject.transform.parent = this.transform;
+    gameObject.transform.position = this.transform.position;
+    var craft = gameObject.GetComponent<BorneCraft>();
+    return (craft);
   }
 
   MotherShipMovement InitMovement()
@@ -47,19 +74,22 @@ public class MotherShip : MonoBehaviour
   MotherShipMovement.Configs CreateConfigs()
   {
     return (new MotherShipMovement.Configs {
-      turningSpeed = this.turningSpeed,
-      acceleration = this.acceleration,
-      verticalAcceleration = this.verticalAcceleration,
-      maxSpeed = this.maxSpeed,
-      angularVelocityThreshold = this.angularVelocityThreshold,
-      angularVelocityDecreseRatio = this.angularVelocityDecreseRatio
+      TurningSpeed = this.turningSpeed,
+      Acceleration = this.acceleration,
+      VerticalAcceleration = this.verticalAcceleration,
+      MaxSpeed = this.maxSpeed,
+      AngularVelocityThreshold = this.angularVelocityThreshold,
+      AngularVelocityDecreseRatio = this.angularVelocityDecreseRatio,
+      BoosterPower = this.boosterPower,
+      BoosterRestore = this.boosterRestore,
+      BoosterConsume = this.boosterConsume,
     });
   }
 
   // Start is called before the first frame update
   void Start()
   {
-
+    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnEnemySelected;
   }
 
   // Update is called once per frame
@@ -72,6 +102,37 @@ public class MotherShip : MonoBehaviour
   {
     if (this.movement != null) {
       this.movement.configs = this.CreateConfigs();
+    }
+  }
+
+  void OnEnemySelected(IDamagable enemy) 
+  {
+    if (enemy != null) {
+      if (this.currentCraftTarget != null) {
+        this.currentCraftTarget.OnDestroyed -= this.OnEnemyDestroyed;
+        this.OnEnemyDeselected();
+      }
+      this.currentCraftTarget = enemy;
+      enemy.OnDestroyed += this.OnEnemyDestroyed;
+      foreach (var craft in this.borneCrafts) {
+        craft.SelectEnemy(enemy); 
+      }
+    }
+  }
+
+  void OnEnemyDeselected()
+  {
+    this.currentCraftTarget = null;
+    foreach (var craft in this.borneCrafts) {
+      craft.DeselectEnemy(); 
+    }
+  }
+
+  void OnEnemyDestroyed(IDamagable enemy)
+  {
+    if (enemy == this.currentCraftTarget) {
+      this.OnEnemyDeselected();
+      enemy.OnDestroyed -= this.OnEnemyDestroyed;
     }
   }
 }

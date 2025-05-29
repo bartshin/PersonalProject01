@@ -65,7 +65,8 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
       damagable = CombatManager.Shared.LastHitEnemy.damagable;
     }
     else {
-      damagable = collider.GetComponent<IDamagable>();
+      damagable = IDamagable.GetDamagable(collider.gameObject) ??
+        IDamagable.FindIDamagableFrom(collider.gameObject);
       if (damagable != null) {
         CombatManager.Shared.LastHitEnemy = (collider.gameObject, damagable);
       }

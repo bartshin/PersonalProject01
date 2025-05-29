@@ -120,5 +120,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 0
   Speed: 0
-  LifeTime: 5
+  LifeTime: 0.8
   FiredShip: {fileID: 0}

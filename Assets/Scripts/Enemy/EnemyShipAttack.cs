@@ -36,6 +36,11 @@ public class EnemyShipAttack
     this.target = target;
   }
 
+  public void RemoveTarget()
+  {
+    this.target = null;
+  }
+
   public void Update(float deltaTime)
   {
     if (this.target != null && this.remainingDelay <= 0 &&

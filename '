@@ -18,7 +18,7 @@ public class BorneCraftMovement
     public float MaxShootAngle;
     public float PrepareSortieTime;
     public float ShootRange;
-    public float MaxDistToSortie;
+    public float MaxRangeToSortie;
     
     public Configs(
         float speed, 
@@ -26,7 +26,7 @@ public class BorneCraftMovement
         float maxShootAngle,
         float shootRange,
         float prepareSortieTime,
-        float maxDistToSortie)
+        float maxRangeToSortie)
     {
       this.Speed = speed;
       this.MoveAngle = (moveAngles.min * 2 * MathF.PI/ 360f, 
@@ -35,7 +35,7 @@ public class BorneCraftMovement
       this.MaxShootAngle = maxShootAngle * 2 * MathF.PI / 360f;
       this.ShootRange = shootRange;
       this.PrepareSortieTime = prepareSortieTime;
-      this.MaxDistToSortie = maxDistToSortie;
+      this.MaxRangeToSortie = maxRangeToSortie;
     }
   }
 
@@ -43,6 +43,7 @@ public class BorneCraftMovement
   public Action OnSortie;
   public Configs configs;
   public float TargetDistance;
+  float targetDistance;
   public bool IsShootable { get; private set; }
   EclipseOrbit orbit;
   float angleSpeed;
@@ -89,8 +90,7 @@ public class BorneCraftMovement
   public void Update(float deltaTime)
   {
     if (this.target != null &&
-        !isSortied && this.waitToSortie <= 0 &&
-        this.TargetDistance < this.configs.MaxDistToSortie) {
+        !isSortied && this.waitToSortie <= 0) {
       this.Sortie();
     }
     if (this.target != null) {

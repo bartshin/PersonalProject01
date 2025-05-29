@@ -6,6 +6,8 @@ public class BorneCraft : MonoBehaviour
 {
   [Header("References")]
   [SerializeField]
+  GameObject ship;
+  [SerializeField]
   GameObject body;
   [SerializeField]
   GameObject projectile;
@@ -13,6 +15,8 @@ public class BorneCraft : MonoBehaviour
   Rigidbody rb;
   [SerializeField]
   Transform target;
+  [SerializeField]
+  ShipHealth health;
 
   [Header("Configs")]
   [SerializeField]
@@ -33,6 +37,10 @@ public class BorneCraft : MonoBehaviour
   int shootDamage;
   [SerializeField]
   float waitOffset;
+  [SerializeField]
+  float projectileSpeed;
+  [SerializeField]
+  float maxDistToSortie;
 
   BorneCraftMovement movement;
   BorneCraftAttack attack;
@@ -47,10 +55,26 @@ public class BorneCraft : MonoBehaviour
     this.attack.SetTarget(target);
   }
 
+  public void SelectEnemy(IDamagable enemy) 
+  {
+    this.SetTarget(enemy.gameObject.transform);
+    this.UpdateTargetDistance();
+  }
+
+  public void DeselectEnemy()
+  {
+    this.target = null;
+    this.movement.RemoveTarget();
+    this.attack.RemoveTarget();
+  }
+
   void Awake()
   {
     if (this.rb == null) {
       this.rb = this.GetComponent<Rigidbody>();
+    }
+    if (this.health == null) {
+      this.health = this.GetComponent<ShipHealth>();
     }
     this.movement = this.InitMovement();
     this.attack = this.InitAttack();
@@ -59,7 +83,7 @@ public class BorneCraft : MonoBehaviour
   BorneCraftAttack InitAttack()
   {
     var attack = new BorneCraftAttack(
-      body: this.body.transform,
+      ship: this.ship,
       projectile: this.projectile,
       configs: this.CreateAttackConfigs()
     );
@@ -74,7 +98,8 @@ public class BorneCraft : MonoBehaviour
   {
     return (new BorneCraftAttack.Configs {
       ShootDelay = this.shootDelay,
-      Damage = this.shootDamage
+      Damage = this.shootDamage,
+      ProjectileSpeed = this.projectileSpeed,
     });
   }
 
@@ -102,29 +127,36 @@ public class BorneCraft : MonoBehaviour
       moveAngles: (this.minMoveAngle, this.maxMoveAngle),
       maxShootAngle: this.maxShootAngle,
       shootRange: this.shootRange,
-      prepareSortieTime: this.prepareSortieTime
+      prepareSortieTime: this.prepareSortieTime,
+      maxDistToSortie: this.maxDistToSortie
     ));
   }
 
   // Start is called before the first frame update
   void Start()
   {
-    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnEnemeySelected;
+    this.health.OnTakeDamage += this.OnTakeDamageFrom;
   }
 
   // Update is called once per frame
   void Update()
   {
     if (this.target != null) {
-      this.targetDistance = Vector3.Distance(
-          this.target.position, this.body.transform.position);
-      this.movement.TargetDistance = this.targetDistance;
+      this.UpdateTargetDistance();
       this.UpdateContainer();
     }
     this.movement.Update(Time.deltaTime);
     if (this.movement.IsShootable) {
       this.attack.Update(Time.deltaTime);
     }
+  }
+
+  void UpdateTargetDistance()
+  {
+    this.targetDistance = Vector3.Distance(
+        this.target.position, this.body.transform.position);
+    this.movement.TargetDistance = this.targetDistance;
+    this.UpdateContainer();
   }
 
   void OnValidate()
@@ -135,14 +167,6 @@ public class BorneCraft : MonoBehaviour
     this.movement.configs = this.CreateMovementConfigs();
     this.attack.configs = this.CreateAttackConfigs();
     this.SetTarget(this.target);
-  }
-
-  void OnEnemeySelected(IDamagable enemy) 
-  {
-    if (enemy != null) {
-      this.body.SetActive(true);
-      this.SetTarget(enemy.gameObject.transform);
-    }
   }
 
   void OnShoot()
@@ -181,4 +205,7 @@ public class BorneCraft : MonoBehaviour
         this.containerOffset.max
       );
   }
+
+  void OnTakeDamageFrom(int damage, Transform attacker) 
+  {}
 }
