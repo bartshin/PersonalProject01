@@ -26,24 +26,22 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   // Start is called before the first frame update
   void Start()
   {
-
+    UserInputManager.Shared.SelectedAttackPosition.OnChanged += this.HandleSelectScreen;
   }
 
-  // Update is called once per frame
-  void Update()
+  void HandleSelectScreen(Nullable<Vector2> position)
   {
-    if (Input.GetKeyDown(InputSettings.SelectEnemyButton)) {
-      var selectedEnemy = this.FindEnemy(); 
-      Debug.Log(selectedEnemy);
+    if (position != null) {
+      var selectedEnemy = this.FindEnemy(position.Value); 
       if (selectedEnemy != null) {
         this.SelectedEnemy.Value = selectedEnemy;
       }
     }
   }
 
-  IDamagable FindEnemy()
+  IDamagable FindEnemy(Vector2 position)
   {
-    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    Ray ray = Camera.main.ScreenPointToRay(new Vector3(position.x, position.y, 0));
     if (Physics.Raycast(
           ray: ray, 
           hitInfo: out RaycastHit hit,

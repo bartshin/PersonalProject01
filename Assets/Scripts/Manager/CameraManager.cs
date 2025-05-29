@@ -6,17 +6,12 @@ using Cinemachine;
 
 public class CameraManager : SingletonBehaviour<CameraManager>
 {
-  [SerializeField]
-  CinemachineVirtualCamera topviewCamera;
-  [SerializeField]
-  CinemachineVirtualCamera sideviewCamera;
-  [SerializeField]
-  Transform topviewFollow;
-  [SerializeField]
-  Transform topviewLookAt;
-  [SerializeField]
-  Vector3 topviewFollowOffset;
-  Transform playerShip;
+  public enum SideCameraDirection
+  {
+    Left,
+    Right
+  }
+  public ObservableValue<Nullable<SideCameraDirection>> ActiveSideCamera; 
   [SerializeField]
   public Vector3 TopviewLookAtOffsetDest
   {
@@ -26,16 +21,36 @@ public class CameraManager : SingletonBehaviour<CameraManager>
       this.isLookAtOffsetMoving = true;
     }
   }
+
+  [SerializeField]
+  CinemachineVirtualCamera topviewCamera;
+  [SerializeField]
+  CinemachineVirtualCamera sideviewCamera;
+  [SerializeField]
+  Transform topviewFollow;
+  [SerializeField]
+  Transform topviewLookAt;
+  [SerializeField]
+  Transform sideviewFollow;
+  [SerializeField]
+  Vector3 topviewFollowOffset;
+  Transform playerShip;
   [SerializeField]
   float topviewLookAtOffsetLerp;
   [SerializeField]
   float topviewLookAtOffsetThreshold;
   Vector3 topviewLookAtOffsetDest;
   bool isLookAtOffsetMoving;
+  int playershipMask;
 
   void Awake()
   {
     base.OnAwake();
+
+    this.playershipMask = (1 << LayerMask.NameToLayer("Player"));
+    this.ActiveSideCamera = new (null);
+    this.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
+    this.ActiveSideCamera.WillChange += this.WillSideCameraChanged;
   }
   // Start is called before the first frame update
   void Start()
@@ -47,19 +62,31 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   public void SetPlayerShip(Transform player)
   {
     this.playerShip = player;
-    this.sideviewCamera.Follow = player;
   }
 
   public void UnsetPlayerShip()
   {
     this.playerShip = null;
-    this.sideviewCamera.Follow = null;
+  }
+
+  void Update()
+  {
+    if (Input.GetKeyDown(KeyCode.Alpha1)) {
+      this.ActiveSideCamera.Value = SideCameraDirection.Left;
+    }
+    if (Input.GetKeyDown(KeyCode.Alpha2)) {
+      this.ActiveSideCamera.Value = SideCameraDirection.Right;
+    }
+    if (Input.GetKeyDown(KeyCode.Alpha3)) {
+      this.ActiveSideCamera.Value = null;
+    }
   }
 
   void LateUpdate()
   {
     if (this.playerShip != null) {
       var playerPosition = this.playerShip.position;
+      this.sideviewFollow.position = playerPosition;
       this.topviewFollow.position = playerPosition + this.topviewFollowOffset;
       if (!this.isLookAtOffsetMoving) {
         this.topviewLookAt.position = new Vector3( 
@@ -99,11 +126,45 @@ public class CameraManager : SingletonBehaviour<CameraManager>
       this.TopviewLookAtOffsetDest = new Vector3(
         offset.x * 0.25f, 0, offset.y * 0.25f
       );
-      this.sideviewCamera.LookAt = enemy.gameObject.transform;
     }
     else if (enemy == null) {
-      this.sideviewCamera.LookAt = null;
       this.TopviewLookAtOffsetDest = Vector3.zero;
+    }
+  }
+
+  void SetCullingMask(Nullable<SideCameraDirection> activeSideCamera)
+  {
+    var currentMask = Camera.main.cullingMask;
+    if (activeSideCamera == null) {
+      Camera.main.cullingMask |= this.playershipMask;
+    }
+    else {
+      Camera.main.cullingMask &= ~this.playershipMask;
+    }
+  }
+
+  void SetSideCameraRotation(SideCameraDirection direction)
+  {
+    this.sideviewFollow.LookAt(
+      this.playerShip.right * 
+      (direction == SideCameraDirection.Left ? -1f: 1f)
+    );
+  }
+
+  void WillSideCameraChanged(Nullable<SideCameraDirection> activeSide)
+  {
+    if (activeSide != null) {
+      this.sideviewCamera.Priority = 0;
+      this.SetCullingMask(null);
+    }
+  }
+
+  void OnSideCameraChanged(Nullable<SideCameraDirection> activeSide)
+  {
+    this.sideviewCamera.Priority = activeSide != null ? 2: 0;
+    this.SetCullingMask(activeSide);
+    if (activeSide != null && this.playerShip != null) {
+      this.SetSideCameraRotation(activeSide.Value);
     }
   }
 }

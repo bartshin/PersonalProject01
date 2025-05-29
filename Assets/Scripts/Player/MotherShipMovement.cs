@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MotherShipMovement
 {
-  struct UserInput
+  public struct UserInput
   {
     public Vector2 Moving;
     public float Altitude;
@@ -135,17 +135,11 @@ public class MotherShipMovement
   UserInput GetInput()
   {
     Vector2 movingInput = new Vector2(
-      Input.GetAxisRaw("Horizontal"),
-      Input.GetAxisRaw("Vertical")
+      UserInputManager.Shared.DirectionInput.x,
+      UserInputManager.Shared.DirectionInput.z
     );
-    float altitude = 0f;
-    if (Input.GetKey(InputSettings.IncreseMotherShipAltiudeKey)) {
-      altitude += 1f;
-    }
-    if (Input.GetKey(InputSettings.DecreseMotherShipAltiudeKey)) {
-      altitude -= 1f; 
-    }
-    bool isBoosting = Input.GetKey(InputSettings.MotherShipAltiudeBoosterKey);
+    float altitude = UserInputManager.Shared.DirectionInput.y;
+    bool isBoosting = UserInputManager.Shared.IsBoosting;
     return (new UserInput{ 
       Moving = movingInput,
       Altitude = altitude,
