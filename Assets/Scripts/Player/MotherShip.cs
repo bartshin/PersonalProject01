@@ -9,7 +9,7 @@ public class MotherShip : MonoBehaviour
   [SerializeField]
   Rigidbody rb;
   [SerializeField]
-  GameObject sideAttackProjectilePrefab;
+  GameObject laserPrefab;
 
   [Header("BorneCraft")]
   public GameObject[] bornCraftPrefabs;
@@ -39,13 +39,13 @@ public class MotherShip : MonoBehaviour
 
   [Header("Sideattack Configs")]
   [SerializeField]
-  float sideAttackDelay;
+  float laserDelay;
   [SerializeField]
-  float sideAttackProjectileSpeed;
+  float laserSpeed;
   [SerializeField]
-  float sideAttackPower;
+  int laserPower;
   [SerializeField]
-  float sideAttackProjectileLifeTime;
+  float laserLifeTime;
 
   MotherShipMovement movement;
   MotherShipSideAttack sideAttack;
@@ -85,8 +85,8 @@ public class MotherShip : MonoBehaviour
   MotherShipSideAttack InitSideAttack()
   {
     var sideAttack = new MotherShipSideAttack(
-      ship: this.transform,
-      projectilePrefab: this.sideAttackProjectilePrefab,
+      ship: this.gameObject,
+      laserPrefab: this.laserPrefab,
       configs: this.CreateSideAttackConfigs()
     );
     return (sideAttack); 
@@ -95,10 +95,10 @@ public class MotherShip : MonoBehaviour
   MotherShipSideAttack.Configs CreateSideAttackConfigs()
   {
     return (new MotherShipSideAttack.Configs {
-      Delay = this.sideAttackDelay,
-      Power = this.sideAttackPower,
-      ProjectileSpeed = this.sideAttackProjectileSpeed,
-      LifeTime = this.sideAttackProjectileLifeTime,
+      LaserDelay = this.laserDelay,
+      LaserPower = this.laserPower,
+      LaserSpeed = this.laserSpeed,
+      LaserLifeTime = this.laserLifeTime,
     });
   }
 
@@ -214,5 +214,7 @@ public class MotherShip : MonoBehaviour
       this.sideAttack.AttackDirection = direction.Value;
     }
     this.sideAttack.IsActive = direction != null;
+    CombatManager.Shared.CurrentAttackMode = direction == null ? 
+      CombatManager.AttackMode.Select: CombatManager.AttackMode.Aim;
   }
 }

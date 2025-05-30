@@ -11,9 +11,24 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
   public Vector2 MouseDelta { get; private set; }
   public bool IsBoosting { get; private set; }
   public bool IsTrackingMouse;
+  public Action MainActionCallback;
+  public bool HasMainActionPressed { get; set; }
+  public bool HasMainActionTrigged
+  {
+    get => this.hasMainActionTrigged;
+    set {
+      this.hasMainActionTrigged = value;
+      if (value && this.MainActionCallback != null) {
+        this.MainActionCallback.Invoke();
+      }
+    }
+  }
+  public bool hasMainActionTrigged;
   InputAction move;
   InputAction attack;
   InputAction speedUp;
+  InputAction look;
+  InputAction mainAction;
 
   void Awake()
   {
@@ -21,6 +36,8 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
     this.move = InputSystem.actions.FindAction("Move");
     this.attack = InputSystem.actions.FindAction("Attack");
     this.speedUp = InputSystem.actions.FindAction("SpeedUp");
+    this.look = InputSystem.actions.FindAction("Look");
+    this.mainAction = InputSystem.actions.FindAction("MainAction");
     this.SelectedAttackPosition = new (null);
   }
 
@@ -36,8 +53,10 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
       this.SelectedAttackPosition.Value = Mouse.current.position.ReadValue();
     }
     if (this.IsTrackingMouse) {
-      this.MouseDelta = Mouse.current.delta.ReadValue();
+      this.MouseDelta = this.look.ReadValue<Vector2>();
     }
+    this.HasMainActionTrigged = false;
+    this.HasMainActionPressed = this.mainAction.IsPressed();
     this.DirectionInput = this.move.ReadValue<Vector3>();
     this.IsBoosting = this.speedUp.IsPressed();
   }

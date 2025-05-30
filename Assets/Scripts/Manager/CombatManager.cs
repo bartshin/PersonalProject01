@@ -5,8 +5,14 @@ using Architecture;
 
 public class CombatManager : SingletonBehaviour<CombatManager>
 {
+  public enum AttackMode
+  {
+    Select,
+    Aim
+  }
   public ObservableValue<IDamagable> SelectedEnemy { get; private set; }
   public (GameObject gameObject, IDamagable damagable) LastHitEnemy;
+  public AttackMode CurrentAttackMode = AttackMode.Select;
   int enemyLayer; 
 
   void Awake()
@@ -32,9 +38,11 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   void HandleSelectScreen(Nullable<Vector2> position)
   {
     if (position != null) {
-      var selectedEnemy = this.FindEnemy(position.Value); 
-      if (selectedEnemy != null) {
-        this.SelectedEnemy.Value = selectedEnemy;
+      if (this.CurrentAttackMode == AttackMode.Select) {
+        var selectedEnemy = this.FindEnemy(position.Value); 
+        if (selectedEnemy != null) {
+          this.SelectedEnemy.Value = selectedEnemy;
+        }
       }
     }
   }

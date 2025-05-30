@@ -11,7 +11,7 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
     get => this.targetPosition;
     set {
       this.targetPosition = value;
-      this.dir = (this.targetPosition - this.transform.position).normalized;
+      this.Direction = (this.targetPosition - this.transform.position).normalized;
       this.transform.LookAt(this.targetPosition);
     }
   }
@@ -36,9 +36,9 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
       this.TargetPosition = value.gameObject.transform.position;
     }
   }
+  public Vector3 Direction;
   IDamagable target;
   Vector3 targetPosition;
-  Vector3 dir;
   float remainingLifeTime; 
 
   // Start is called before the first frame update
@@ -50,7 +50,7 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
   void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
-    this.transform.position += this.dir * this.Speed * Time.deltaTime;
+    this.transform.position += this.Direction * this.Speed * Time.deltaTime;
     if (this.remainingLifeTime < 0) {
       this.gameObject.SetActive(false);
     }

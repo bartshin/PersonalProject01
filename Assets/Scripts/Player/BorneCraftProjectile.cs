@@ -10,7 +10,7 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
     get => this.targetPosition;
     set {
       this.targetPosition = value;
-      this.dir = (this.targetPosition - this.transform.position).normalized;
+      this.Direction = (this.targetPosition - this.transform.position).normalized;
       this.transform.LookAt(this.targetPosition);
     }
   }
@@ -23,12 +23,12 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
     }
   }
   Action<BorneCraftProjectile> onDisabled;
+  public Vector3 Direction;
   public int Damage;
   public float Speed;
   public float LifeTime = 5f;
   public GameObject FiredShip;
   Vector3 targetPosition;
-  Vector3 dir;
   float remainingLifeTime; 
 
   // Start is called before the first frame update
@@ -40,7 +40,7 @@ public class BorneCraftProjectile : MonoBehaviour, IPooedObject
   void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
-    this.transform.position += this.dir * this.Speed * Time.deltaTime;
+    this.transform.position += this.Direction * this.Speed * Time.deltaTime;
     if (this.remainingLifeTime < 0) {
       this.gameObject.SetActive(false);
     }
