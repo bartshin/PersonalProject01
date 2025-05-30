@@ -23,7 +23,7 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   Transform target;
   [SerializeField]
-  ShipHealth health;
+  CraftShipHealth health;
 
   [Header("Movement Configs")]
   [SerializeField]
@@ -50,6 +50,8 @@ public class BorneCraft : MonoBehaviour
   int shootDamage;
   [SerializeField]
   float projectileSpeed;
+
+  public Action<BorneCraft> OnReturned;
   public Configs CraftConfigs 
   {
     get => this.configs;
@@ -70,6 +72,11 @@ public class BorneCraft : MonoBehaviour
   bool isSortie;
   float targetDistance;
   (float min, float max) containerOffset = (1f, 10f);
+
+  public int RestoreBarrier(int amount)
+  {
+    return (this.health.RestoreBarrier(amount));
+  }
 
   public void SetTarget(Transform target)
   {
@@ -97,7 +104,7 @@ public class BorneCraft : MonoBehaviour
       this.rb = this.GetComponent<Rigidbody>();
     }
     if (this.health == null) {
-      this.health = this.GetComponent<ShipHealth>();
+      this.health = this.GetComponent<CraftShipHealth>();
     }
     this.movement = this.InitMovement();
     this.attack = this.InitAttack();
@@ -161,9 +168,9 @@ public class BorneCraft : MonoBehaviour
     this.health.OnTakeDamage += this.OnTakeDamageFrom;
   }
 
-  // Update is called once per frame
   void Update()
   {
+
     if (this.target != null) {
       this.UpdateTargetDistance();
       this.UpdateContainer();
@@ -200,6 +207,9 @@ public class BorneCraft : MonoBehaviour
   {
     this.body.SetActive(false);
     this.isSortie = false;
+    if (this.OnReturned != null) {
+      this.OnReturned.Invoke(this);
+    }
   }
 
   void OnSorite()

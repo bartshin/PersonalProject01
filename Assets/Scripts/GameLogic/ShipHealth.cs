@@ -33,11 +33,6 @@ public class ShipHealth : MonoBehaviour, IDamagable
     this.Hp = new((this.maxHp, this.maxHp));
   }
 
-  protected virtual void Update()
-  {
-
-  }
-
   protected virtual void OnDisable()
   {
     if (this.OnDisabled != null) {
@@ -47,23 +42,29 @@ public class ShipHealth : MonoBehaviour, IDamagable
 
   public virtual int TakeDamage(int attackDamage)
   {
-    var damage = (this._TakeDamage(attackDamage));
+    var damage = (this.GetDamaged(attackDamage));
     if (this.OnTakeDamage != null) {
       this.OnTakeDamage.Invoke(damage, null);
+    }
+    if (damage > 0 && this.Hp.Value.current <= 0) {
+      this.OnRunoutHp();
     }
     return (damage);
   }
 
   public virtual int TakeDamage(int attackDamage, Transform attacker)
   {
-    var damage = this._TakeDamage(attackDamage);
+    var damage = this.GetDamaged(attackDamage);
     if (this.OnTakeDamage != null) {
       this.OnTakeDamage.Invoke(damage, attacker);
+    }
+    if (damage > 0 && this.Hp.Value.current <= 0) {
+      this.OnRunoutHp();
     }
     return (damage);
   }
 
-  protected virtual int _TakeDamage(int attackDamage)
+  protected virtual int GetDamaged(int attackDamage)
   {
     var damage = Math.Max(attackDamage - this.defense, 0);
     var damageTaken = Math.Min(
@@ -72,9 +73,6 @@ public class ShipHealth : MonoBehaviour, IDamagable
     );
     var (current, max) = this.Hp.Value;
     this.Hp.Value = (current - damageTaken, max);
-    if (current > 0 && this.Hp.Value.current <= 0) {
-      this.OnRunoutHp();
-    }
     return (damageTaken);
   }
 

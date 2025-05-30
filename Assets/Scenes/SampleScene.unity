@@ -336,6 +336,7 @@ GameObject:
   - component: {fileID: 605610268}
   - component: {fileID: 605610270}
   - component: {fileID: 605610271}
+  - component: {fileID: 605610272}
   m_Layer: 6
   m_Name: Mother Ship
   m_TagString: Untagged
@@ -371,8 +372,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e8a08465427ef298631e180e9d29ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  status: {fileID: 605610272}
   rb: {fileID: 605610269}
-  laserPrefab: {fileID: 6704381560025226224, guid: 5c43be8ed53640e6785d789a5b01db10,
+  laserPrefab: {fileID: 6704381560025226224, guid: 9282b1ac1519b61a2ad796130f0b3c8d,
     type: 3}
   missilePrefab: {fileID: 5849992662120167732, guid: c6077445de26cdb6299d680e10f45f25,
     type: 3}
@@ -387,6 +389,8 @@ MonoBehaviour:
     WaitOffset: 0.5
   - RotateAngle: 120
     WaitOffset: 1
+  craftShipBatteryEffiency: 2
+  craftShipBatteryMaxEffiency: 50
   turningSpeed: 0.3
   acceleration: 1
   verticalAcceleration: 0.5
@@ -397,6 +401,10 @@ MonoBehaviour:
   boosterPower: 5
   boosterRestore: 10
   boosterConsume: 30
+  accelerationEffiency: 0.5
+  maxSpeedEffiency: 1
+  boosterRestoreEffiency: 3
+  boosterPowerEffiency: 1
   laserDelay: 0.3
   laserSpeed: 100
   laserPower: 5
@@ -448,7 +456,10 @@ MonoBehaviour:
   maxHp: 1000
   defense: 1
   WaitToDestroy: 4
-  maxBarrier: 0
+  status: {fileID: 0}
+  maxBarrier: 100
+  barrierRestore: 0
+  barrierEfficiency: 2
 --- !u!136 &605610271
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -472,6 +483,25 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &605610272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 605610266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa040a59e6f55e38b8bbf09244b8eca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: {fileID: 605610270}
+  distributionConfigs:
+    Max: 10
+    MotherShipBarrier: 3
+    MotherShipSpeed: 3
+    MotherShipBooster: 2
+    CraftShipBarrier: 3
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1349,7 +1379,7 @@ MonoBehaviour:
   chasingTimeWhenAttacked: 5
   shootRange: 200
   shootDelay: 0.2
-  shootDamage: 3
+  shootDamage: 10
   projectileSpeed: 80
 --- !u!135 &1966302252
 SphereCollider:

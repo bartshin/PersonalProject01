@@ -18,6 +18,14 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   int enemyLayer; 
   int maxTargetCount = 3;
 
+  public void CancelAttack()
+  {
+    if (this.SelectedEnemy.Value != null) {
+      this.AddTargetToFront(this.SelectedEnemy.Value);
+      this.SelectedEnemy.Value = null;
+    }
+  }
+
   public void ExecuteAttack()
   {
     if (this.Targets.Count > 0) {
@@ -61,6 +69,9 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
     if (Input.GetKeyDown(KeyCode.Return)) {
       this.ExecuteAttack();
+    }
+    if (Input.GetKeyDown(KeyCode.Escape)) {
+      this.CancelAttack();
     }
   }
 

@@ -85,7 +85,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
         this.sideviewDirDest * Vector3.forward;
       this.sideviewLookAt.rotation = this.sideviewDirDest;
     }
-    //FIXME: Make UI**********/
+    //FIXME: Make UI************************
     if (Input.GetKeyDown(KeyCode.Alpha1)) {
       this.ActiveSideCamera.Value = Direction.Left;
     }
@@ -95,7 +95,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
     if (Input.GetKeyDown(KeyCode.Alpha3)) {
       this.ActiveSideCamera.Value = null;
     }
-    /*************************/
+    //***************************************
   }
 
   void LateUpdate()

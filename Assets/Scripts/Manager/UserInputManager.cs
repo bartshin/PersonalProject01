@@ -49,7 +49,7 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
   public bool IsBoosting { get; private set; }
   public bool IsUsingPointer 
   { 
-    get => this.isTrackingPointerDelta;
+    get => !this.isTrackingPointerDelta;
     set {
       this.isTrackingPointerDelta = !value;
       Cursor.visible = value;
@@ -68,7 +68,7 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
   void Awake()
   {
     base.OnAwake();
-    this.IsUsingPointer = false;
+    this.IsUsingPointer = true;
     this.move = InputSystem.actions.FindAction("Move");
     this.primarySelect = InputSystem.actions.FindAction("PrimarySelect");
     this.secondarySelect = InputSystem.actions.FindAction("SecondarySelect");
