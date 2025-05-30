@@ -38,7 +38,7 @@ public class MotherShipSideAttack
   float rotationClampAngle = 45f;
   AudioClip laserSound;
   AudioClip missileSound;
-  MonoBehaviourPool<BorneCraftProjectile> laserPool;
+  MonoBehaviourPool<Laser> laserPool;
   MonoBehaviourPool<Missile> missilePool;
 
   public MotherShipSideAttack(

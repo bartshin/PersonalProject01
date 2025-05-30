@@ -42,53 +42,61 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
     }
   }
 
-  public ObservableValue<Nullable<Vector2>> SelectedScreenPosition;
+  public ObservableValue<Nullable<Vector2>> PrimarySelectedScreenPosition;
+  public ObservableValue<Nullable<Vector2>> SecondarySelectedScreenPosition;
   public Vector3 DirectionInput { get; private set; }
   public Vector2 PointerDelta { get; private set; }
   public bool IsBoosting { get; private set; }
   public bool IsUsingPointer 
   { 
-    get => this.isTrackingMouse;
+    get => this.isTrackingPointerDelta;
     set {
-      this.isTrackingMouse = value;
-      Cursor.visible = !value;
+      this.isTrackingPointerDelta = !value;
+      Cursor.visible = value;
     }
   }
   public bool hasMainActionTrigged;
   public Operation MainOperation { get; private set; }
   public Operation SubOperation { get; private set; }
-  bool isTrackingMouse;
+  bool isTrackingPointerDelta;
   InputAction move;
-  InputAction select;
+  InputAction primarySelect;
+  InputAction secondarySelect;
   InputAction speedUp;
   InputAction look;
 
   void Awake()
   {
     base.OnAwake();
+    this.IsUsingPointer = false;
     this.move = InputSystem.actions.FindAction("Move");
-    this.select = InputSystem.actions.FindAction("Select");
+    this.primarySelect = InputSystem.actions.FindAction("PrimarySelect");
+    this.secondarySelect = InputSystem.actions.FindAction("SecondarySelect");
     this.speedUp = InputSystem.actions.FindAction("SpeedUp");
     this.look = InputSystem.actions.FindAction("Look");
     this.MainOperation = new Operation(
       InputSystem.actions.FindAction("MainAction"));
     this.SubOperation = new Operation(InputSystem.actions.FindAction("SubAction"));
-    this.SelectedScreenPosition = new (null);
+    this.PrimarySelectedScreenPosition = new (null);
+    this.SecondarySelectedScreenPosition = new (null);
   }
 
   void OnEnable()
   {
-    this.move.Enable();
-    this.select.Enable();
   }
 
   void Update()
   {
     if (this.IsUsingPointer) {
-      this.PointerDelta = this.look.ReadValue<Vector2>();
+      if (this.primarySelect.WasPressedThisFrame()) {
+        this.PrimarySelectedScreenPosition.Value = Pointer.current.position.ReadValue();
+      }
+      if (this.secondarySelect.WasPressedThisFrame()) {
+        this.SecondarySelectedScreenPosition.Value = Pointer.current.position.ReadValue(); 
+      }
     }
-    else if (this.select.WasPressedThisFrame()) {
-      this.SelectedScreenPosition.Value = Mouse.current.position.ReadValue();
+    else {
+      this.PointerDelta = this.look.ReadValue<Vector2>();
     }
     this.MainOperation.Update();
     this.SubOperation.Update();
@@ -98,8 +106,6 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
 
   void OnDisable()
   {
-    this.move.Disable();
-    this.select.Disable();
   }
 
   void OnDestory()

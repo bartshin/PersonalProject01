@@ -24,7 +24,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Select",
+                    "name": "PrimarySelect",
                     "type": "Button",
                     "id": "6c2ab1b8-8984-453a-af3d-a3c78ae1679a",
                     "expectedControlType": "",
@@ -54,6 +54,15 @@
                     "name": "SubAction",
                     "type": "Button",
                     "id": "ea344a53-9f09-4fcc-9039-51e573bf1a65",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SecondarySelect",
+                    "type": "Button",
+                    "id": "7ce58b85-ac20-40a7-a5d6-9a7f3f1ec78b",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -178,18 +187,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8255d333-5683-4943-a58a-ccb207ff1dce",
-                    "path": "<XRController>/{PrimaryAction}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "XR",
-                    "action": "Select",
+                    "action": "PrimarySelect",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -245,6 +243,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "SubAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1c164a0-e266-4a93-a37e-6c2f45bcb425",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SecondarySelect",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

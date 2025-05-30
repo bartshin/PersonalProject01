@@ -221,7 +221,7 @@ public class MotherShip : MonoBehaviour
 
   void OnSideCameraChanged(Nullable<Direction> direction) 
   {
-    UserInputManager.Shared.IsUsingPointer = direction != null;
+    UserInputManager.Shared.IsUsingPointer = direction == null;
     if (direction != null) {
       if (direction.Value == Direction.Left) {
         this.sideAttack.AimDirection = Quaternion.LookRotation(this.transform.right * -1f);
