@@ -58,7 +58,7 @@ public class EnemyShipAttack
     var projectile = this.projectilePool.Get();
     projectile.transform.position = this.ship.transform.position;
     projectile.Damage = this.configs.ShootDamage;
-    projectile.Speed = this.configs.ProjectileSpeed;
+    projectile.InitialSpeed = this.configs.ProjectileSpeed;
     projectile.FiredShip = this.ship;
     projectile.Target = target;
   }

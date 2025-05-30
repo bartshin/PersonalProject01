@@ -56,7 +56,7 @@ public class BorneCraftAttack
     var projectile = this.projectilePool.Get();
     projectile.transform.position = this.ship.transform.position;
     projectile.FiredShip = this.ship;
-    projectile.Speed = this.configs.ProjectileSpeed;
+    projectile.InitialSpeed = this.configs.ProjectileSpeed;
     projectile.Damage = this.configs.Damage;
     projectile.TargetPosition = this.targetTransform.position;
     if (this.OnShoot != null) {

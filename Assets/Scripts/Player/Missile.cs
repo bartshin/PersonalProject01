@@ -3,34 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using Architecture;
 
-public class BorneCraftProjectile : BaseProjectile, IPooedObject, IProjectile
+public class Missile : BaseProjectile, IPooedObject
 {
+  public float Acceleration;
   public Action<IPooedObject> OnDisabled 
   { 
-    get => this.onDisabled as Action<IPooedObject>; 
+    get => this.onDisabled as Action<IPooedObject>;
     set {
       this.onDisabled = value;
     }
   }
-  Action<BorneCraftProjectile> onDisabled;
+  public override Vector3 Direction 
+  { 
+    get => base.Direction;
+    set {
+      base.Direction = value;
+      this.transform.forward = value;
+    }
+  }
 
-  void Start()
+  Action<Missile> onDisabled;
+  Vector3 velocity;
+
+  override protected void OnEnable()
   {
+    base.OnEnable();
+    this.velocity = this.Direction * this.InitialSpeed;
   }
 
   void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
-    this.transform.position += this.Direction * this.InitialSpeed * Time.deltaTime;
+    this.velocity += this.Direction * this.Acceleration * Time.deltaTime;
+    this.transform.position += this.velocity;
     if (this.remainingLifeTime < 0) {
       this.DestroySelf();
-    }
-  }
-
-  void OnDisable()
-  {
-    if (this.OnDisabled != null) {
-      this.OnDisabled.Invoke(this);
     }
   }
 

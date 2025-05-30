@@ -374,6 +374,8 @@ MonoBehaviour:
   rb: {fileID: 605610269}
   laserPrefab: {fileID: 6704381560025226224, guid: 5c43be8ed53640e6785d789a5b01db10,
     type: 3}
+  missilePrefab: {fileID: 5849992662120167732, guid: c6077445de26cdb6299d680e10f45f25,
+    type: 3}
   bornCraftPrefabs:
   - {fileID: 7628778512112002177, guid: 0ac79419707368eab8b8992662c29952, type: 3}
   - {fileID: 7628778512112002177, guid: 0ac79419707368eab8b8992662c29952, type: 3}
@@ -399,6 +401,11 @@ MonoBehaviour:
   laserSpeed: 100
   laserPower: 5
   laserLifeTime: 0.5
+  missileDelay: 1.5
+  missileInitialSpeed: 5
+  missileAcceleration: 2
+  missilePower: 10
+  missileLifeTime: 3
 --- !u!54 &605610269
 Rigidbody:
   m_ObjectHideFlags: 0

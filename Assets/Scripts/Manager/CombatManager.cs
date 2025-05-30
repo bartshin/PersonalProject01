@@ -32,17 +32,16 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   // Start is called before the first frame update
   void Start()
   {
-    UserInputManager.Shared.SelectedAttackPosition.OnChanged += this.HandleSelectScreen;
+    UserInputManager.Shared.SelectedScreenPosition.OnChanged += this.HandleSelectScreen;
   }
 
   void HandleSelectScreen(Nullable<Vector2> position)
   {
-    if (position != null) {
-      if (this.CurrentAttackMode == AttackMode.Select) {
-        var selectedEnemy = this.FindEnemy(position.Value); 
-        if (selectedEnemy != null) {
-          this.SelectedEnemy.Value = selectedEnemy;
-        }
+    if (position != null &&
+        this.CurrentAttackMode == AttackMode.Select) {
+      var selectedEnemy = this.FindEnemy(position.Value); 
+      if (selectedEnemy != null) {
+        this.SelectedEnemy.Value = selectedEnemy;
       }
     }
   }

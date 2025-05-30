@@ -10,6 +10,8 @@ public class MotherShip : MonoBehaviour
   Rigidbody rb;
   [SerializeField]
   GameObject laserPrefab;
+  [SerializeField]
+  GameObject missilePrefab;
 
   [Header("BorneCraft")]
   public GameObject[] bornCraftPrefabs;
@@ -46,6 +48,16 @@ public class MotherShip : MonoBehaviour
   int laserPower;
   [SerializeField]
   float laserLifeTime;
+  [SerializeField]
+  float missileDelay;
+  [SerializeField]
+  float missileInitialSpeed;
+  [SerializeField]
+  float missileAcceleration;
+  [SerializeField]
+  int missilePower;
+  [SerializeField]
+  float missileLifeTime;
 
   MotherShipMovement movement;
   MotherShipSideAttack sideAttack;
@@ -87,6 +99,7 @@ public class MotherShip : MonoBehaviour
     var sideAttack = new MotherShipSideAttack(
       ship: this.gameObject,
       laserPrefab: this.laserPrefab,
+      missilePrefab: this.missilePrefab,
       configs: this.CreateSideAttackConfigs()
     );
     return (sideAttack); 
@@ -99,6 +112,11 @@ public class MotherShip : MonoBehaviour
       LaserPower = this.laserPower,
       LaserSpeed = this.laserSpeed,
       LaserLifeTime = this.laserLifeTime,
+      MissileDelay = this.missileDelay,
+      MissilePower = this.missilePower,
+      MissileInitialSpeed = this.missileInitialSpeed,
+      MissileAcceleration = this.missileAcceleration,
+      MissileLifeTime = this.missileLifeTime,
     });
   }
 
@@ -203,7 +221,7 @@ public class MotherShip : MonoBehaviour
 
   void OnSideCameraChanged(Nullable<Direction> direction) 
   {
-    UserInputManager.Shared.IsTrackingMouse = direction != null;
+    UserInputManager.Shared.IsUsingPointer = direction != null;
     if (direction != null) {
       if (direction.Value == Direction.Left) {
         this.sideAttack.AimDirection = Quaternion.LookRotation(this.transform.right * -1f);

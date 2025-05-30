@@ -45,13 +45,13 @@ public class Crosshair : MonoBehaviour
   void AddEventListeners()
   {
     CameraManager.Shared.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
-    UserInputManager.Shared.MainActionCallback += this.OnAction;
+    UserInputManager.Shared.MainOperation.OnTriggered += this.OnAction;
   }
 
   void RemoveEventListeners()
   {
     CameraManager.Shared.ActiveSideCamera.OnChanged -= this.OnSideCameraChanged;
-    UserInputManager.Shared.MainActionCallback -= this.OnAction;
+    UserInputManager.Shared.MainOperation.OnTriggered -= this.OnAction;
   }
 
   void OnSideCameraChanged(Nullable<Direction> direction) 

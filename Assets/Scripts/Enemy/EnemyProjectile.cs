@@ -3,18 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Architecture;
 
-public class EnemyProjectile : MonoBehaviour, IPooedObject
-
+public class EnemyProjectile : BaseProjectile, IPooedObject, IProjectile
 {
-  public Vector3 TargetPosition
-  {
-    get => this.targetPosition;
-    set {
-      this.targetPosition = value;
-      this.Direction = (this.targetPosition - this.transform.position).normalized;
-      this.transform.LookAt(this.targetPosition);
-    }
-  }
 
   public Action<IPooedObject> OnDisabled 
   { 
@@ -23,23 +13,7 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
       this.onDisabled = value;
     }
   }
-  Action<BorneCraftProjectile> onDisabled;
-  public int Damage;
-  public float Speed;
-  public float LifeTime = 5f;
-  public GameObject FiredShip;
-  public IDamagable Target
-  {
-    get => this.target;
-    set {
-      this.target = value;
-      this.TargetPosition = value.gameObject.transform.position;
-    }
-  }
-  public Vector3 Direction;
-  IDamagable target;
-  Vector3 targetPosition;
-  float remainingLifeTime; 
+  Action<EnemyProjectile> onDisabled;
 
   // Start is called before the first frame update
   void Start()
@@ -50,15 +24,10 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
   void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
-    this.transform.position += this.Direction * this.Speed * Time.deltaTime;
+    this.transform.position += this.Direction * this.InitialSpeed * Time.deltaTime;
     if (this.remainingLifeTime < 0) {
-      this.gameObject.SetActive(false);
+      this.DestroySelf();
     }
-  }
-
-  void OnEnable()
-  {
-    this.remainingLifeTime = this.LifeTime;
   }
 
   void OnDisable()
@@ -68,19 +37,19 @@ public class EnemyProjectile : MonoBehaviour, IPooedObject
     }
   }
 
-  void OnTriggerEnter(Collider collider)
+  protected override IDamagable GetTargetFrom(Collider collider)
   {
-    IDamagable damagable = null;
     if (collider.gameObject == this.Target.gameObject) {
-      damagable = this.Target;
+      return (this.Target);
     }
     else {
-      damagable = IDamagable.GetDamagable(collider.gameObject) ??
-        IDamagable.FindIDamagableFrom(collider.gameObject);
+      return (IDamagable.GetDamagable(collider.gameObject) ??
+          IDamagable.FindIDamagableFrom(collider.gameObject));
     }
-    if (damagable != null) {
-      damagable.TakeDamage(this.Damage, this.FiredShip.transform);
-    }
+  }
+
+  protected override void DestroySelf()
+  {
     this.gameObject.SetActive(false);
   }
 }
