@@ -1,7 +1,6 @@
 
 # Unity Imports Assets
-# submodule로 관리
-#/[Aa]ssets/[Ii]mport
+/[Aa]ssets/[Ii]mports
 
 # c-tag
 **/tags
