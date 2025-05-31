@@ -14,6 +14,8 @@ public class MotherShip : MonoBehaviour
   GameObject laserPrefab;
   [SerializeField]
   GameObject missilePrefab;
+  [SerializeField]
+  GameObject muzzleFlashPrefab;
 
   [Header("BorneCraft")]
   public GameObject[] bornCraftPrefabs;
@@ -122,6 +124,7 @@ public class MotherShip : MonoBehaviour
     var sideAttack = new MotherShipSideAttack(
       ship: this.gameObject,
       laserPrefab: this.laserPrefab,
+      muzzleFlashPrefab: this.muzzleFlashPrefab,
       missilePrefab: this.missilePrefab,
       configs: this.CreateSideAttackConfigs()
     );

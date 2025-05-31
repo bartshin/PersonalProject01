@@ -17,9 +17,10 @@ namespace Architecture
       var gameObject = this.prefab != null ?
         Object.Instantiate(this.prefab):
         new GameObject(nameof(T));
-      T monoBehaviour = this.prefab != null ?
-        gameObject.GetComponent<T>():
-        gameObject.AddComponent<T>();
+      T monoBehaviour = gameObject.GetComponent<T>();
+      if (monoBehaviour == null) {
+        monoBehaviour = gameObject.AddComponent<T>();
+      }
       return (monoBehaviour);
     }
 

@@ -5,6 +5,7 @@ using Architecture;
 
 public class MotherShipSideAttack 
 {
+  static readonly Vector3 MUZZLE_FLASH_SCALE = new Vector3(2f, 2f, 2f);
   public struct Configs
   {
     public float LaserDelay;
@@ -38,12 +39,16 @@ public class MotherShipSideAttack
   float rotationClampAngle = 45f;
   AudioClip laserSound;
   AudioClip missileSound;
-  MonoBehaviourPool<Laser> laserPool;
+  MonoBehaviourPool<BorneCraftLaser> laserPool;
   MonoBehaviourPool<Missile> missilePool;
+  MonoBehaviourPool<SimplePooledObject> muzzleFlashPool;
+
+  Vector3 muzzleOffset;
 
   public MotherShipSideAttack(
       GameObject ship,
       GameObject laserPrefab,
+      GameObject muzzleFlashPrefab,
       GameObject missilePrefab,
       Configs configs
       )
@@ -61,6 +66,12 @@ public class MotherShipSideAttack
       poolSize: 20,
       maxPoolSize: 50,
       prefab: missilePrefab
+    );
+
+    this.muzzleFlashPool = new (
+      poolSize: 10,
+      maxPoolSize: 30,
+      prefab: muzzleFlashPrefab
     );
   }
 
@@ -114,6 +125,15 @@ public class MotherShipSideAttack
     projectile.Direction = this.AimDirection * Vector3.forward;
     projectile.LifeTime = this.configs.LaserLifeTime;
     projectile.FiredShip = this.ship;
+    var muzzleFlash = this.muzzleFlashPool.Get();
+    var dir = this.AimDirection * Vector3.forward;
+    muzzleFlash.transform.position = this.ship.transform.position + this.ship.transform.forward + dir;
+    muzzleFlash.transform.forward = Vector3.Lerp(
+      this.ship.transform.forward * -1f,
+      dir,
+      0.8f
+    );
+    muzzleFlash.transform.localScale = MotherShipSideAttack.MUZZLE_FLASH_SCALE;
     this.PlayLaserSound(this.laserSound);
   }
 

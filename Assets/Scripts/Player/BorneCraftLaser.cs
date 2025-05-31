@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Architecture;
+using UnityEngine.VFX;
 
-public class BorneCraftProjectile : BaseProjectile, IPooedObject, IProjectile
+public class BorneCraftLaser : BaseProjectile, IPooedObject, IProjectile
 {
+  [SerializeField]
+  VisualEffect laserEffect;
   public Action<IPooedObject> OnDisabled 
   { 
     get => this.onDisabled as Action<IPooedObject>; 
@@ -12,7 +15,7 @@ public class BorneCraftProjectile : BaseProjectile, IPooedObject, IProjectile
       this.onDisabled = value;
     }
   }
-  Action<BorneCraftProjectile> onDisabled;
+  Action<BorneCraftLaser> onDisabled;
 
   void Start()
   {
@@ -21,6 +24,7 @@ public class BorneCraftProjectile : BaseProjectile, IPooedObject, IProjectile
   void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
+    this.laserEffect.SetFloat("duration", this.LifeTime);
     this.transform.position += this.Direction * this.InitialSpeed * Time.deltaTime;
     if (this.remainingLifeTime < 0) {
       this.DestroySelf();
