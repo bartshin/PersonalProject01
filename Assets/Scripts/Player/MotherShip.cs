@@ -110,7 +110,7 @@ public class MotherShip : MonoBehaviour
   {
     var gameObject = Instantiate(prefab);
     gameObject.transform.parent = this.transform;
-    gameObject.transform.position = this.transform.position;
+    gameObject.transform.localPosition = BorneCraftMovement.BASE_POSITION;
     var craft = gameObject.GetComponent<BorneCraft>();
     craft.CraftConfigs = configs;
     craft.OnReturned += this.OnCraftShipReturned;

@@ -65,6 +65,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   {
     this.playerShip = player;
     this.sideviewCamera.Follow = player;
+    this.topviewFollow.position = player.position+ this.topviewFollowOffset;
   }
 
   public void UnsetPlayerShip()

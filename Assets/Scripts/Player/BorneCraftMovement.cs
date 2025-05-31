@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class BorneCraftMovement 
 {
+  const float Y_OFFSET_FROM_MOTHERSHIP = -10f;
+  public static readonly  Vector3 BASE_POSITION = new Vector3(
+    0, Y_OFFSET_FROM_MOTHERSHIP, 0
+  );
   public struct EclipseOrbit
   {
     public float Length;
@@ -123,7 +127,7 @@ public class BorneCraftMovement
     this.currentOrbitAngle = this.configs.MoveAngle.min;
     this.SetOrbit(this.target.position);
     this.transform.localPosition = Vector3.Lerp(
-      Vector3.zero,
+      BorneCraftMovement.BASE_POSITION,
       new Vector3(
         MathF.Cos(this.currentOrbitAngle) * this.orbit.Width,
         this.transform.localPosition.y,
@@ -172,7 +176,7 @@ public class BorneCraftMovement
    else {
      this.transform.localPosition = Vector3.Lerp(
         this.transform.localPosition,
-        Vector3.zero,
+        BorneCraftMovement.BASE_POSITION,
         1.5f * deltaTime
      );
    }
@@ -188,7 +192,7 @@ public class BorneCraftMovement
       this.transform.rotation = Quaternion.Lerp(
         this.transform.rotation,
         Quaternion.LookRotation(containerDir, this.transform.up),
-        deltaTime
+        5f * deltaTime
       );
     }
   }
