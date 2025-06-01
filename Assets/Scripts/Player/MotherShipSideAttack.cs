@@ -6,6 +6,7 @@ using Architecture;
 public class MotherShipSideAttack 
 {
   static readonly Vector3 MUZZLE_FLASH_SCALE = new Vector3(2f, 2f, 2f);
+  const float MUZZLE_FLASH_LIFETIME = 0.5f;
   public struct Configs
   {
     public float LaserDelay;
@@ -134,6 +135,7 @@ public class MotherShipSideAttack
       0.8f
     );
     muzzleFlash.transform.localScale = MotherShipSideAttack.MUZZLE_FLASH_SCALE;
+    muzzleFlash.LifeTime = MotherShipSideAttack.MUZZLE_FLASH_LIFETIME;
     this.PlayLaserSound(this.laserSound);
   }
 

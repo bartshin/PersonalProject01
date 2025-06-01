@@ -10,7 +10,15 @@ class SimplePooledObject : MonoBehaviour, IPooedObject
     set => this.onDisabled = value;
   }
   Action<SimplePooledObject> onDisabled;
+  public float LifeTime;
 
+  void Update()
+  {
+    this.LifeTime -= Time.deltaTime;
+    if (this.LifeTime <= 0) {
+      this.gameObject.SetActive(false);
+    }
+  }
 
   void OnDisable()
   {
@@ -18,5 +26,6 @@ class SimplePooledObject : MonoBehaviour, IPooedObject
       this.onDisabled.Invoke(this);
     }
   }
+
 }
 
