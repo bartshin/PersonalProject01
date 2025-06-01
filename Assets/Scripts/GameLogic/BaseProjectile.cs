@@ -20,6 +20,7 @@ public abstract class BaseProjectile : MonoBehaviour, IProjectile
   }
 
   virtual public Vector3 Direction { get; set; }
+  protected Vector3 direction;
   virtual public int Damage { get; set; }
   virtual public float InitialSpeed { get; set; }
   virtual public float LifeTime { get; set; } = 5f;

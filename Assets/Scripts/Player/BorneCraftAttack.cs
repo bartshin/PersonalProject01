@@ -17,7 +17,7 @@ public class BorneCraftAttack
   float remainDelay;
   GameObject ship;
   Transform targetTransform;
-  MonoBehaviourPool<BorneCraftLaser> projectilePool;
+  MonoBehaviourPool<Laser> projectilePool;
 
   public BorneCraftAttack(GameObject ship, GameObject projectile, Configs configs)
   {

@@ -7,11 +7,13 @@ public class MotherShip : MonoBehaviour
 {
   [Header("References")]
   [SerializeField]
+  GameObject interior;
+  [SerializeField]
   StatusController status;
   [SerializeField]
   Rigidbody rb;
   [SerializeField]
-  GameObject laserPrefab;
+  GameObject bulletPrefab;
   [SerializeField]
   GameObject missilePrefab;
   [SerializeField]
@@ -59,13 +61,13 @@ public class MotherShip : MonoBehaviour
 
   [Header("Sideattack Configs")]
   [SerializeField]
-  float laserDelay;
+  float bulletDelay;
   [SerializeField]
-  float laserSpeed;
+  float bulletSpeed;
   [SerializeField]
-  int laserPower;
+  int bulletPower;
   [SerializeField]
-  float laserLifeTime;
+  float bulletLifeTime;
   [SerializeField]
   float missileDelay;
   [SerializeField]
@@ -123,7 +125,7 @@ public class MotherShip : MonoBehaviour
   {
     var sideAttack = new MotherShipSideAttack(
       ship: this.gameObject,
-      laserPrefab: this.laserPrefab,
+      bulletPrefab: this.bulletPrefab,
       muzzleFlashPrefab: this.muzzleFlashPrefab,
       missilePrefab: this.missilePrefab,
       configs: this.CreateSideAttackConfigs()
@@ -134,10 +136,10 @@ public class MotherShip : MonoBehaviour
   MotherShipSideAttack.Configs CreateSideAttackConfigs()
   {
     return (new MotherShipSideAttack.Configs {
-      LaserDelay = this.laserDelay,
-      LaserPower = this.laserPower,
-      LaserSpeed = this.laserSpeed,
-      LaserLifeTime = this.laserLifeTime,
+      BulletDelay = this.bulletDelay,
+      BulletPower = this.bulletPower,
+      BulletSpeed = this.bulletSpeed,
+      BulletLifeTime = this.bulletLifeTime,
       MissileDelay = this.missileDelay,
       MissilePower = this.missilePower,
       MissileInitialSpeed = this.missileInitialSpeed,
@@ -179,6 +181,7 @@ public class MotherShip : MonoBehaviour
     this.status.Distribution.MotherShipBooster.OnChanged += this.SetBoosterPower;
     this.SetCraftShipBarrierPower(this.status.Distribution.CraftShipBarrier.Value);
     this.status.Distribution.MotherShipBarrier.OnChanged += this.SetCraftShipBarrierPower;
+    this.interior.transform.localPosition = CameraManager.Shared.SideviewOffset;
   }
 
   void OnEnable()
@@ -206,6 +209,26 @@ public class MotherShip : MonoBehaviour
     this.UpdateCraftShipBattery(Time.deltaTime);
     this.movement.Update(Time.deltaTime);
     this.sideAttack.Update(Time.deltaTime);
+    if (this.sideAttack.IsActive) {
+      this.UpdateInterior();
+    }
+  }
+
+  void UpdateInterior()
+  {
+    var rotation = this.sideAttack.AimDirection.eulerAngles;
+    var (x, z) = (rotation.x, rotation.z);
+    if (x > 180) {
+      x -= 360f;
+    }
+    if (z > 180) {
+      z -= 360f;
+    }
+    this.interior.transform.rotation = Quaternion.Euler(
+        Mathf.Lerp(this.rb.rotation.x, x, 0.8f),
+        rotation.y,
+        Mathf.Lerp(this.rb.rotation.z, z, 0.8f)
+        );
   }
 
   void OnValidate()
@@ -282,6 +305,7 @@ public class MotherShip : MonoBehaviour
     this.sideAttack.IsActive = direction != null;
     CombatManager.Shared.CurrentAttackMode = direction == null ? 
       CombatManager.AttackMode.Select: CombatManager.AttackMode.Aim;
+    this.movement.IsRotatable = direction == null;
   }
 
   void SetMovementSpeedPower(int power)  

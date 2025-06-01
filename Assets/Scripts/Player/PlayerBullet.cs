@@ -4,10 +4,8 @@ using UnityEngine;
 using Architecture;
 using UnityEngine.VFX;
 
-public class BorneCraftLaser : BaseProjectile, IPooedObject, IProjectile
+public class PlayerBullet : BaseProjectile, IPooedObject, IProjectile
 {
-  [SerializeField]
-  VisualEffect laserEffect;
   public Action<IPooedObject> OnDisabled 
   { 
     get => this.onDisabled as Action<IPooedObject>; 
@@ -15,23 +13,29 @@ public class BorneCraftLaser : BaseProjectile, IPooedObject, IProjectile
       this.onDisabled = value;
     }
   }
-  Action<BorneCraftLaser> onDisabled;
+  Action<PlayerBullet> onDisabled;
 
-  void Start()
+  [SerializeField]
+  TrailRenderer trail;
+
+  public void EnableTrail()
   {
+    if (this.trail != null) {
+      this.trail.Clear();
+      this.trail.time = this.LifeTime;
+    }
   }
 
-  void Update()
+  protected void Update()
   {
     this.remainingLifeTime -= Time.deltaTime;
-    this.laserEffect.SetFloat("duration", this.LifeTime);
     this.transform.position += this.Direction * this.InitialSpeed * Time.deltaTime;
     if (this.remainingLifeTime < 0) {
       this.DestroySelf();
     }
   }
 
-  void OnDisable()
+  protected void OnDisable()
   {
     if (this.OnDisabled != null) {
       this.OnDisabled.Invoke(this);
@@ -55,6 +59,9 @@ public class BorneCraftLaser : BaseProjectile, IPooedObject, IProjectile
 
   protected override void DestroySelf()
   {
+    if (this.trail != null) {
+      this.trail.time = -1f;
+    }
     this.gameObject.SetActive(false);
   }
 }

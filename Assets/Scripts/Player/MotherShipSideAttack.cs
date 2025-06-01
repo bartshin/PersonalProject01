@@ -5,14 +5,15 @@ using Architecture;
 
 public class MotherShipSideAttack 
 {
-  static readonly Vector3 MUZZLE_FLASH_SCALE = new Vector3(2f, 2f, 2f);
+  static readonly Vector3 MUZZLE_FLASH_SCALE = new Vector3(1.5f, 1.5f, 1.5f);
+  static readonly Vector3 MUZZLE_OFFSET = new Vector3(0, -0.5f, 0);
   const float MUZZLE_FLASH_LIFETIME = 0.5f;
   public struct Configs
   {
-    public float LaserDelay;
-    public float LaserSpeed; 
-    public int LaserPower; 
-    public float LaserLifeTime; 
+    public float BulletDelay;
+    public float BulletSpeed; 
+    public int BulletPower; 
+    public float BulletLifeTime; 
     public float MissileDelay;
     public float MissileInitialSpeed; 
     public float MissileAcceleration; 
@@ -35,20 +36,20 @@ public class MotherShipSideAttack
   public Direction AttackDirection;
   bool isActive;
   GameObject ship;
-  (float laser, float missile) remainingDelay;
+  (float bullet, float missile) remainingDelay;
   (float xAngle, float yDot) maxRotation = (30f, 0.7f);
   float rotationClampAngle = 45f;
-  AudioClip laserSound;
+  AudioClip bulletSound;
   AudioClip missileSound;
-  MonoBehaviourPool<BorneCraftLaser> laserPool;
+  MonoBehaviourPool<PlayerBullet> bulletPool;
   MonoBehaviourPool<Missile> missilePool;
   MonoBehaviourPool<SimplePooledObject> muzzleFlashPool;
 
-  Vector3 muzzleOffset;
+  float fireDist = 5f;
 
   public MotherShipSideAttack(
       GameObject ship,
-      GameObject laserPrefab,
+      GameObject bulletPrefab,
       GameObject muzzleFlashPrefab,
       GameObject missilePrefab,
       Configs configs
@@ -56,12 +57,12 @@ public class MotherShipSideAttack
   { 
     this.ship = ship;
     this.configs = configs;
-    this.laserSound = Resources.Load<AudioClip>("Audio/soft_laser_blast");
+    this.bulletSound = Resources.Load<AudioClip>("Audio/soft_laser_blast");
     this.missileSound = Resources.Load<AudioClip>("Audio/missile_firing");
-    this.laserPool = new (
+    this.bulletPool = new (
       poolSize: 30,
       maxPoolSize: 100,
-      prefab: laserPrefab
+      prefab: bulletPrefab
     );
     this.missilePool = new (
       poolSize: 20,
@@ -84,24 +85,24 @@ public class MotherShipSideAttack
       this.ClampAim(deltaTime);
       this.RotateAim(deltaTime);
       if (UserInputManager.Shared.MainOperation.HasRegistered &&
-          this.remainingDelay.laser <= 0) {
+          this.remainingDelay.bullet <= 0) {
         UserInputManager.Shared.MainOperation.HasTriggered = true;
-        this.FireLaser(); 
-        this.remainingDelay = (this.configs.LaserDelay, this.remainingDelay.missile);
+        this.FireBullet(); 
+        this.remainingDelay = (this.configs.BulletDelay, this.remainingDelay.missile);
       }
       if (UserInputManager.Shared.SubOperation.HasRegistered &&
           this.remainingDelay.missile <= 0) {
         UserInputManager.Shared.SubOperation.HasRegistered = true;
         this.FireMissile();
-        this.remainingDelay = (this.remainingDelay.laser, this.configs.MissileDelay);
+        this.remainingDelay = (this.remainingDelay.bullet, this.configs.MissileDelay);
       }
     }
   }
 
   void UpdateDelay(float deltaTime)
   {
-    var (laser, missile) = this.remainingDelay;
-    this.remainingDelay = (laser - deltaTime, missile - deltaTime);
+    var (bullet, missile) = this.remainingDelay;
+    this.remainingDelay = (bullet - deltaTime, missile - deltaTime);
   }
 
   void FireMissile()
@@ -109,37 +110,39 @@ public class MotherShipSideAttack
     var projectile = this.missilePool.Get();
     projectile.transform.position = this.ship.transform.position;
     projectile.InitialSpeed = this.configs.MissileInitialSpeed;
-    projectile.Damage = this.configs.LaserPower;
+    projectile.Damage = this.configs.BulletPower;
     projectile.Direction = this.AimDirection * Vector3.forward;
     projectile.LifeTime = this.configs.MissileLifeTime;
     projectile.Acceleration = this.configs.MissileAcceleration;
     projectile.FiredShip = this.ship;
-    this.PlayLaserSound(this.missileSound);
+    this.PlayBulletSound(this.missileSound);
   }
 
-  void FireLaser()
+  void FireBullet()
   {
-    var projectile = this.laserPool.Get();
-    projectile.transform.position = this.ship.transform.position;
-    projectile.InitialSpeed = this.configs.LaserSpeed;
-    projectile.Damage = this.configs.LaserPower;
-    projectile.Direction = this.AimDirection * Vector3.forward;
-    projectile.LifeTime = this.configs.LaserLifeTime;
-    projectile.FiredShip = this.ship;
-    var muzzleFlash = this.muzzleFlashPool.Get();
     var dir = this.AimDirection * Vector3.forward;
-    muzzleFlash.transform.position = this.ship.transform.position + this.ship.transform.forward + dir;
+    var projectile = this.bulletPool.Get();
+    projectile.transform.SetPositionAndRotation(
+     this.ship.transform.position + this.fireDist * dir,
+     this.AimDirection);
+    projectile.InitialSpeed = this.configs.BulletSpeed;
+    projectile.Damage = this.configs.BulletPower;
+    projectile.Direction = this.AimDirection * Vector3.forward;
+    projectile.LifeTime = this.configs.BulletLifeTime;
+    projectile.FiredShip = this.ship;
+    projectile.EnableTrail();
+    var muzzleFlash = this.muzzleFlashPool.Get();
+    muzzleFlash.transform.position = this.ship.transform.position + MotherShipSideAttack.MUZZLE_OFFSET + (this.fireDist + 2f) * dir;
     muzzleFlash.transform.forward = Vector3.Lerp(
-      this.ship.transform.forward * -1f,
-      dir,
-      0.8f
-    );
+          this.ship.transform.up,
+          dir,
+          0.65f);
     muzzleFlash.transform.localScale = MotherShipSideAttack.MUZZLE_FLASH_SCALE;
     muzzleFlash.LifeTime = MotherShipSideAttack.MUZZLE_FLASH_LIFETIME;
-    this.PlayLaserSound(this.laserSound);
+    this.PlayBulletSound(this.bulletSound);
   }
 
-  void PlayLaserSound(AudioClip clip)
+  void PlayBulletSound(AudioClip clip)
   {
     var sfx = AudioManager.Shared.GetSfxController();
     sfx.transform.position = this.ship.transform.position;

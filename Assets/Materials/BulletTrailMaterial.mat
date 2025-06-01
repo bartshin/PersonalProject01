@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: OuterTrailMaterial
+  m_Name: BulletTrailMaterial
   m_Shader: {fileID: -6465566751694194690, guid: fe75e1f29aed0b3a2baf1e1f333ed1c3,
     type: 3}
   m_Parent: {fileID: 0}
@@ -49,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 0ac2517f1bfa2bcd1a6b42cfaf9149a4, type: 3}
+        m_Texture: {fileID: 2800000, guid: 504e88cff21debe1dacb12367e5a2cca, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -93,7 +93,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _DissolveScale: 3
+    - _DissolveScale: 35
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
@@ -117,11 +117,11 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorA: {r: 1, g: 0.39242283, b: 0, a: 1}
-    - _ColorB: {r: 0.75686276, g: 0.5417615, b: 0, a: 0.27450982}
+    - _ColorA: {r: 11.447212, g: 0.9481578, b: 0, a: 1}
+    - _ColorB: {r: 0.10373902, g: 0.05201359, b: 0.06919974, a: 0}
     - _DissolveSpeed: {r: -0.5, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _MainTexSpeed: {r: -0.5, g: 0, b: 0, a: 0}
+    - _MainTexSpeed: {r: -0.1, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &2285583851479477768

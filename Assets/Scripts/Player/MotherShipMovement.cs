@@ -29,6 +29,7 @@ public class MotherShipMovement
   }
 
   public Configs configs;
+  public bool IsRotatable;
   Rigidbody rb;
   Transform transform;
   float currentBooster;
@@ -42,6 +43,7 @@ public class MotherShipMovement
     this.configs = configs;
     this.isBoosting = false;
     this.currentBooster = 50f;
+    this.IsRotatable = true;
   }
 
   public void Update(float deltaTime)
@@ -57,7 +59,9 @@ public class MotherShipMovement
         this.isBoosting = false;
       }
     }
-    this.UpdateDirection(input.IsTuring, input.Moving.x, deltaTime);
+    if (this.IsRotatable) {
+      this.UpdateDirection(input.IsTuring, input.Moving.x, deltaTime);
+    }
     if (input.IsAccelerating) {
       this.Move(input.Moving.y, deltaTime);
     }

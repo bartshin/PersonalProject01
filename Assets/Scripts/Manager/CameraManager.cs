@@ -22,6 +22,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
       this.isLookAtOffsetMoving = true;
     }
   }
+  public Vector3 SideviewOffset;
 
   [SerializeField]
   CinemachineVirtualCamera topviewCamera;
@@ -31,6 +32,8 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   Transform topviewFollow;
   [SerializeField]
   Transform topviewLookAt;
+  [SerializeField]
+  Transform sideviewFollow;
   [SerializeField]
   Transform sideviewLookAt;
   [SerializeField]
@@ -44,12 +47,14 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   Quaternion sideviewDirDest;
   bool isLookAtOffsetMoving;
   int playershipMask;
+  int playerInteriorMask;
   float sideviewRadius = 10f;
 
   void Awake()
   {
     base.OnAwake();
     this.playershipMask = (1 << LayerMask.NameToLayer("Player"));
+    this.playerInteriorMask = (1 << LayerMask.NameToLayer("PlayerInterior"));
     this.ActiveSideCamera = new (null);
     this.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
     this.ActiveSideCamera.WillChange += this.WillSideCameraChanged;
@@ -64,7 +69,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   public void SetPlayerShip(Transform player)
   {
     this.playerShip = player;
-    this.sideviewCamera.Follow = player;
+    this.sideviewFollow.position = player.position + this.SideviewOffset;
     this.topviewFollow.position = player.position+ this.topviewFollowOffset;
   }
 
@@ -81,11 +86,6 @@ public class CameraManager : SingletonBehaviour<CameraManager>
 
   void Update()
   {
-    if (this.ActiveSideCamera.Value != null && this.playerShip != null) {
-      this.sideviewLookAt.position = this.playerShip.position +
-        this.sideviewDirDest * Vector3.forward;
-      this.sideviewLookAt.rotation = this.sideviewDirDest;
-    }
     //FIXME: Make UI************************
     if (Input.GetKeyDown(KeyCode.Alpha1)) {
       this.ActiveSideCamera.Value = Direction.Left;
@@ -102,27 +102,35 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   void LateUpdate()
   {
     if (this.playerShip != null) {
-      var playerPosition = this.playerShip.position;
-      this.topviewFollow.position = playerPosition + this.topviewFollowOffset;
-      if (!this.isLookAtOffsetMoving) {
-        this.topviewLookAt.position = new Vector3( 
-          playerPosition.x + this.TopviewLookAtOffsetDest.x,
-          playerPosition.y + this.TopviewLookAtOffsetDest.y,
-          playerPosition.z + this.TopviewLookAtOffsetDest.z
-        );
+      if (this.ActiveSideCamera.Value != null) {
+        this.sideviewFollow.position = this.playerShip.position + this.SideviewOffset;
+        this.sideviewLookAt.position = this.sideviewFollow.position +
+          this.sideviewDirDest * Vector3.forward;
+        this.sideviewLookAt.rotation = this.sideviewDirDest;
       }
       else {
-        this.topviewLookAt.position = Vector3.Lerp(
-          this.topviewLookAt.position,
-          playerPosition + this.topviewLookAtOffsetDest,
-          this.topviewLookAtOffsetLerp * Time.smoothDeltaTime
-        );
-        var dist = Vector3.Distance(
-          this.topviewLookAt.position,
-          playerPosition + this.TopviewLookAtOffsetDest
-        );
-        if (dist < this.topviewLookAtOffsetThreshold) {
-          this.isLookAtOffsetMoving = false;
+        var playerPosition = this.playerShip.position;
+        this.topviewFollow.position = playerPosition + this.topviewFollowOffset;
+        if (!this.isLookAtOffsetMoving) {
+          this.topviewLookAt.position = new Vector3( 
+              playerPosition.x + this.TopviewLookAtOffsetDest.x,
+              playerPosition.y + this.TopviewLookAtOffsetDest.y,
+              playerPosition.z + this.TopviewLookAtOffsetDest.z
+              );
+        }
+        else {
+          this.topviewLookAt.position = Vector3.Lerp(
+              this.topviewLookAt.position,
+              playerPosition + this.topviewLookAtOffsetDest,
+              this.topviewLookAtOffsetLerp * Time.smoothDeltaTime
+              );
+          var dist = Vector3.Distance(
+              this.topviewLookAt.position,
+              playerPosition + this.TopviewLookAtOffsetDest
+              );
+          if (dist < this.topviewLookAtOffsetThreshold) {
+            this.isLookAtOffsetMoving = false;
+          }
         }
       }
     }
@@ -153,9 +161,11 @@ public class CameraManager : SingletonBehaviour<CameraManager>
     var currentMask = Camera.main.cullingMask;
     if (activeSideCamera == null) {
       Camera.main.cullingMask |= this.playershipMask;
+      Camera.main.cullingMask &= ~this.playerInteriorMask;
     }
     else {
       Camera.main.cullingMask &= ~this.playershipMask;
+      Camera.main.cullingMask |= this.playerInteriorMask;
     }
   }
 
