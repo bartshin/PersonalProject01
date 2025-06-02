@@ -4623,6 +4623,8 @@ MonoBehaviour:
     type: 3}
   missilePrefab: {fileID: 5849992662120167732, guid: c6077445de26cdb6299d680e10f45f25,
     type: 3}
+  missileExplosion: {fileID: 1337198075554910, guid: 25c7aa9ad705fe143a4d71c1c8deb7d4,
+    type: 3}
   muzzleFlashPrefab: {fileID: 3654468301513560928, guid: b5c8e7d25e7c22ed495d0ae00db24059,
     type: 3}
   bornCraftPrefabs:

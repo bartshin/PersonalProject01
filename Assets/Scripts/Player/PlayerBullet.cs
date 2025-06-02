@@ -4,7 +4,7 @@ using UnityEngine;
 using Architecture;
 using UnityEngine.VFX;
 
-public class PlayerBullet : BaseProjectile, IPooedObject, IProjectile
+public class PlayerBullet : BaseProjectile, IPooedObject
 {
   public Action<IPooedObject> OnDisabled 
   { 
@@ -18,12 +18,24 @@ public class PlayerBullet : BaseProjectile, IPooedObject, IProjectile
   [SerializeField]
   TrailRenderer trail;
 
-  public void EnableTrail()
-  {
-    if (this.trail != null) {
-      this.trail.Clear();
-      this.trail.time = this.LifeTime;
+  public override float LifeTime 
+  { 
+    get => this.lifeTime; 
+    set {
+      this.lifeTime = value;
+      if (this.trail != null) {
+        this.InitTrail();
+      }
     }
+  }
+
+  float lifeTime;
+  
+
+  void InitTrail()
+  {
+    this.trail.Clear();
+    this.trail.time = this.LifeTime;
   }
 
   protected void Update()

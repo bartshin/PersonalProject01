@@ -5,6 +5,12 @@ using Architecture;
 
 public class AudioManager : SingletonBehaviour<AudioManager>
 {
+  public readonly static AudioClip SmallExposionSound;
+
+  static AudioManager()
+  {
+    AudioManager.SmallExposionSound = Resources.Load<AudioClip>("Audio/ship_explosion_short");
+  }
 
   new public static void CreateInstance()  
   {

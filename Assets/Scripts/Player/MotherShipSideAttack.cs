@@ -43,6 +43,7 @@ public class MotherShipSideAttack
   AudioClip missileSound;
   MonoBehaviourPool<PlayerBullet> bulletPool;
   MonoBehaviourPool<Missile> missilePool;
+  MonoBehaviourPool<SimplePooledObject> missileExplosionPool;
   MonoBehaviourPool<SimplePooledObject> muzzleFlashPool;
 
   float fireDist = 5f;
@@ -52,6 +53,7 @@ public class MotherShipSideAttack
       GameObject bulletPrefab,
       GameObject muzzleFlashPrefab,
       GameObject missilePrefab,
+      GameObject missileExplosion,
       Configs configs
       )
   { 
@@ -68,6 +70,11 @@ public class MotherShipSideAttack
       poolSize: 20,
       maxPoolSize: 50,
       prefab: missilePrefab
+    );
+    this.missileExplosionPool = new (
+      poolSize: 20,
+      maxPoolSize: 50,
+      prefab: missileExplosion
     );
 
     this.muzzleFlashPool = new (
@@ -131,7 +138,6 @@ public class MotherShipSideAttack
     projectile.Direction = this.AimDirection * Vector3.forward;
     projectile.LifeTime = this.configs.BulletLifeTime;
     projectile.FiredShip = this.ship;
-    projectile.EnableTrail();
     var muzzleFlash = this.muzzleFlashPool.Get();
     muzzleFlash.transform.position = this.ship.transform.position + MotherShipSideAttack.MUZZLE_OFFSET + (this.fireDist + 2f) * dir;
     muzzleFlash.transform.forward = Vector3.Lerp(

@@ -267,6 +267,8 @@ MonoBehaviour:
   body: {fileID: 581465084638471897}
   projectile: {fileID: 6704381560025226224, guid: 5c43be8ed53640e6785d789a5b01db10,
     type: 3}
+  projectileExplosion: {fileID: 1329845292236604, guid: 9bba9cf244c53c5439505dfc96fdd11c,
+    type: 3}
   rb: {fileID: 3289173051291896821}
   target: {fileID: 0}
   health: {fileID: 5715930248739726834}
@@ -281,6 +283,7 @@ MonoBehaviour:
   shootDelay: 0.5
   shootDamage: 4
   projectileSpeed: 80
+  projectileLifeTime: 2
 --- !u!1001 &2582252140924036837
 PrefabInstance:
   m_ObjectHideFlags: 0

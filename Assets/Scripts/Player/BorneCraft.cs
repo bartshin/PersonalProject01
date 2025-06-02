@@ -19,6 +19,8 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   GameObject projectile;
   [SerializeField]
+  GameObject projectileExplosion;
+  [SerializeField]
   Rigidbody rb;
   [SerializeField]
   Transform target;
@@ -50,6 +52,8 @@ public class BorneCraft : MonoBehaviour
   int shootDamage;
   [SerializeField]
   float projectileSpeed;
+  [SerializeField]
+  float projectileLifeTime;
 
   public Action<BorneCraft> OnReturned;
   public Configs CraftConfigs 
@@ -115,6 +119,7 @@ public class BorneCraft : MonoBehaviour
     var attack = new BorneCraftAttack(
       ship: this.ship,
       projectile: this.projectile,
+      explosion: this.projectileExplosion,
       configs: this.CreateAttackConfigs()
     );
     if (this.target != null) {
@@ -130,6 +135,7 @@ public class BorneCraft : MonoBehaviour
       ShootDelay = this.shootDelay,
       Damage = this.shootDamage,
       ProjectileSpeed = this.projectileSpeed,
+      ProjectileLifeTime = this.projectileLifeTime,
     });
   }
 

@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class EnemyShip : MonoBehaviour
 {
+  const float DESTORYED_EXPLOSION_LIFETIME = 1.5f;
+  const float DESTORYED_SOUND_VOLUME = 0.8f;
+  static readonly Vector3 DESTORY_EXPLOSION_SCALE = new Vector3(10f, 10f, 10f);
+
   [Header("References")]
   [SerializeField]
   Rigidbody rb;
@@ -17,6 +21,8 @@ public class EnemyShip : MonoBehaviour
   SphereCollider detectTrigger;
   [SerializeField]
   GameObject projectile;
+  [SerializeField]
+  GameObject destoryedEffect;
 
   [Header("Movement Configs")]
   [SerializeField]
@@ -213,8 +219,17 @@ public class EnemyShip : MonoBehaviour
     }
   }
 
-  void OnDestroyed(ShipHealth health)
+  void OnDestroyed(IDamagable health)
   {
+    var effect = Instantiate(this.destoryedEffect).GetComponent<BaseExplosion>();
+    effect.transform.position = this.body.position;
+    effect.LifeTime = EnemyShip.DESTORYED_EXPLOSION_LIFETIME;
+    effect.transform.localScale = EnemyShip.DESTORY_EXPLOSION_SCALE; 
+    effect.gameObject.SetActive(true);
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.transform.position = this.body.position;
+    sfx.SetVolume(EnemyShip.DESTORYED_SOUND_VOLUME);
+    sfx.PlaySound(AudioManager.SmallExposionSound);
     this.RemoveTarget();
   }
 }

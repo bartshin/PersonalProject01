@@ -7,7 +7,7 @@ public abstract class BaseProjectile : MonoBehaviour, IProjectile
 {
 
   abstract protected IDamagable GetTargetFrom(Collider collider);
-  protected virtual void OnHit(Transform target) {}
+  public Action<BaseProjectile, Collider> OnHit;
 
   virtual public Vector3 TargetPosition
   {
@@ -43,7 +43,9 @@ public abstract class BaseProjectile : MonoBehaviour, IProjectile
 
   protected virtual void OnTriggerEnter(Collider collider)
   {
-    this.OnHit(collider.transform);
+    if (this.OnHit != null) {
+      this.OnHit.Invoke(this, collider);
+    }
     var damagable = this.GetTargetFrom(collider);
     if (damagable != null) {
       damagable.TakeDamage(this.Damage, this.FiredShip.transform);

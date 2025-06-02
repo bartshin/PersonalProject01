@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Architecture;
 
-class SimplePooledObject : MonoBehaviour, IPooedObject
+public class SimplePooledObject : MonoBehaviour, IPooedObject
 {
   public Action<IPooedObject> OnDisabled 
   { 
@@ -10,7 +10,7 @@ class SimplePooledObject : MonoBehaviour, IPooedObject
     set => this.onDisabled = value;
   }
   Action<SimplePooledObject> onDisabled;
-  public float LifeTime;
+  public virtual float LifeTime { get; set; }
 
   void Update()
   {
@@ -25,7 +25,9 @@ class SimplePooledObject : MonoBehaviour, IPooedObject
     if (this.onDisabled != null) {
       this.onDisabled.Invoke(this);
     }
+    else {
+      Destroy(this.gameObject);
+    }
   }
-
 }
 

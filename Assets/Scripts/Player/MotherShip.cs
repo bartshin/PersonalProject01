@@ -17,6 +17,8 @@ public class MotherShip : MonoBehaviour
   [SerializeField]
   GameObject missilePrefab;
   [SerializeField]
+  GameObject missileExplosion;
+  [SerializeField]
   GameObject muzzleFlashPrefab;
 
   [Header("BorneCraft")]
@@ -128,6 +130,7 @@ public class MotherShip : MonoBehaviour
       bulletPrefab: this.bulletPrefab,
       muzzleFlashPrefab: this.muzzleFlashPrefab,
       missilePrefab: this.missilePrefab,
+      missileExplosion: this.missileExplosion,
       configs: this.CreateSideAttackConfigs()
     );
     return (sideAttack); 

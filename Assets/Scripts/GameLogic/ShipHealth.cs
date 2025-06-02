@@ -11,20 +11,12 @@ public class ShipHealth : MonoBehaviour, IDamagable
   protected int maxHp;
   [SerializeField]
   protected int defense;
-  public Action<ShipHealth> OnDestroyed;
   public Action<int, Transform> OnTakeDamage;
   public float WaitToDestroy = 4f;
-  Action<IDamagable> IDamagable.OnDestroyed 
-  { 
-    get => this.OnDestroyed as Action<IDamagable>; 
-    set {
-      this.OnDestroyed = value;
-    }
-  }
-
+  public Action<IDamagable> OnDestroyed { get; set; }
   public Action<IDamagable> OnDisabled { get; set; }
 
-  public ObservableValue<(int current, int max)> Hp;
+    public ObservableValue<(int current, int max)> Hp;
 
 
   protected virtual void Awake()
@@ -79,7 +71,7 @@ public class ShipHealth : MonoBehaviour, IDamagable
   protected virtual void OnRunoutHp()
   {
     if (this.OnDestroyed != null) {
-      this.OnDestroyed(this);
+      this.OnDestroyed.Invoke(this);
     }
     this.StartCoroutine(this.DestorySelf());
   }
