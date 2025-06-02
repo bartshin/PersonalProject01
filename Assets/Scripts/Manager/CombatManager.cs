@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Architecture;
 
 public class CombatManager : SingletonBehaviour<CombatManager>
@@ -38,6 +39,22 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
   }
 
+  public void OnSelectEnemy(IDamagable enemy, bool isPrimaryButton)
+  {
+    if (isPrimaryButton) {
+      var index = this.Targets.IndexOf(enemy);
+      if (index != -1) {
+        this.Targets.RemoveAt(index);
+      }
+      else {
+        this.Targets.Add(enemy);
+      }
+    }
+    else {
+      this.StartAttack(enemy);
+    }
+  }
+
   void Awake()
   {
     base.OnAwake();
@@ -62,6 +79,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
 
   void Update()
   {
+    //FIXME: Remove test *********************************************
     if (Input.GetKeyDown(KeyCode.Alpha4)) {
       for (int i = 0; i < this.Targets.Count; i++) {
         Debug.Log($"{i}: {this.Targets[i].gameObject.name}"); 
@@ -73,6 +91,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     if (Input.GetKeyDown(KeyCode.Escape)) {
       this.CancelAttack();
     }
+    //****************************************************************
   }
 
   void OnDestroy()
@@ -82,7 +101,11 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     base.OnDestroyed();
   }
 
-  void HandlePrimarySelect(Nullable<Vector2> position)
+  void HandlePrimarySelect(Nullable<Vector2> position) => this.HandleSelectScreenPosition(position, true);
+
+  void HandleSecondarySelect(Nullable<Vector2> position) => this.HandleSelectScreenPosition(position, false);
+
+  void HandleSelectScreenPosition(Nullable<Vector2> position, bool isPrimaryButton)
   {
     if (position != null &&
         this.CurrentAttackMode == AttackMode.Select) {
@@ -90,25 +113,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
       if (selectedEnemy == null) {
         return ;
       }
-      this.StartAttack(selectedEnemy);
-    }
-  }
-
-  void HandleSecondarySelect(Nullable<Vector2> position)
-  {
-    if (position != null &&
-        this.CurrentAttackMode == AttackMode.Select) {
-      var selectedEnemy = this.FindEnemy(position.Value);
-      if (selectedEnemy == null) {
-        return ;
-      }
-      var index = this.Targets.IndexOf(selectedEnemy);
-      if (index != -1) {
-        this.Targets.RemoveAt(index);
-      }
-      else {
-        this.Targets.Add(selectedEnemy);
-      }
+      this.OnSelectEnemy(selectedEnemy, isPrimaryButton);
     }
   }
 
@@ -136,16 +141,24 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     if (index != -1) {
       this.Targets.RemoveAt(index);
     }
-    else if (this.SelectedEnemy.Value != null) {
+    else if (this.SelectedEnemy.Value != null &&
+        target != this.SelectedEnemy.Value) {
       this.AddTargetToFront(this.SelectedEnemy.Value); 
     }
-    this.SelectedEnemy.Value = target;
+    if (target != this.SelectedEnemy.Value) {
+      this.SelectedEnemy.Value = target;
+    }
+    else {
+      this.SelectedEnemy.Value = null;
+    }
   }
 
   IDamagable FindEnemy(Vector2 position)
   {
     Ray ray = Camera.main.ScreenPointToRay(new Vector3(position.x, position.y, 0));
-    if (Physics.Raycast(
+    if (
+        !EventSystem.current.IsPointerOverGameObject() &&
+        Physics.Raycast(
           ray: ray, 
           hitInfo: out RaycastHit hit,
           maxDistance: Mathf.Infinity,

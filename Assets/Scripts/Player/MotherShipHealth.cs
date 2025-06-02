@@ -158,7 +158,6 @@ public class MotherShipHealth : ShipHealth
   void SpawnHitEffect(MonoBehaviourPool<BaseExplosion> pool, Vector3 position, (int min, int max) scaleRange)
   {
     var effect = pool.Get();
-    Debug.Log(effect);
     effect.transform.position = position;
     effect.LifeTime = MotherShipHealth.HIT_EFFECT_LIFE_TIME;
     var scale = MotherShipHealth.SCALE_RAND.Next(

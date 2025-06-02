@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class EnemyShip : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class EnemyShip : MonoBehaviour
   GameObject destoryedEffect;
   [SerializeField]
   GauageImageUI HpBar;
+  [SerializeField]
+  PointerHandler HpBarPointerHandler;
 
   [Header("Movement Configs")]
   [SerializeField]
@@ -134,6 +137,10 @@ public class EnemyShip : MonoBehaviour
     this.health.OnDestroyed += this.OnDestroyed;
     if (this.HpBar != null && this.health != null) {
       this.HpBar.WatchingIntValue = this.health.Hp;
+      //this.HpBar.gameObject.SetActive(false);
+    }
+    if (this.HpBarPointerHandler != null) {
+      this.HpBarPointerHandler.AddEvent(PointerHandler.PointerEvent.Click, this.OnClickHpbar);
     }
   }
 
@@ -203,6 +210,9 @@ public class EnemyShip : MonoBehaviour
 
   void OnTakeDamage(int damage, Transform attacker, Nullable<Vector3> attackedPosition)
   {
+    if (this.HpBar != null) {
+      this.HpBar.gameObject.SetActive(true);
+    }
     var attackerDamagble = attacker.gameObject.GetComponent<IDamagable>();
     if (this.target == null && attackerDamagble != null) {
       this.StartCombatWith(attackerDamagble);
@@ -239,5 +249,13 @@ public class EnemyShip : MonoBehaviour
     sfx.SetVolume(EnemyShip.DESTORYED_SOUND_VOLUME);
     sfx.PlaySound(AudioManager.SmallExposionSound);
     this.RemoveTarget();
+  }
+
+  void OnClickHpbar(PointerEventData eventData)
+  {
+    if (eventData.button != PointerEventData.InputButton.Middle) {
+      CombatManager.Shared.OnSelectEnemy(this.health,
+          eventData.button == PointerEventData.InputButton.Left);
+    }
   }
 }
