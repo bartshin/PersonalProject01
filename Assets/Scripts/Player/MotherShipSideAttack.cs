@@ -107,11 +107,12 @@ public class MotherShipSideAttack
 
   void FireMissile()
   {
+    var dir = this.AimDirection * Vector3.forward;
     var projectile = this.missilePool.Get();
-    projectile.transform.position = this.ship.transform.position;
+    projectile.transform.position = this.ship.transform.position + this.fireDist * dir;
     projectile.InitialSpeed = this.configs.MissileInitialSpeed;
     projectile.Damage = this.configs.BulletPower;
-    projectile.Direction = this.AimDirection * Vector3.forward;
+    projectile.Direction = dir;
     projectile.LifeTime = this.configs.MissileLifeTime;
     projectile.Acceleration = this.configs.MissileAcceleration;
     projectile.FiredShip = this.ship;

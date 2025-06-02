@@ -1,4 +1,4 @@
-Shader "Unlit/Grow"
+Shader "Unlit/Crosshair"
 {
   Properties
   {

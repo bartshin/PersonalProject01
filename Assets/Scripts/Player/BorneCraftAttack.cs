@@ -12,12 +12,15 @@ public class BorneCraftAttack
     public float ProjectileSpeed;
   }
 
+  static readonly System.Random ShotVolumeRand = new ();
+
   public Action OnShoot;
   public Configs configs;
   float remainDelay;
   GameObject ship;
   Transform targetTransform;
   MonoBehaviourPool<Laser> projectilePool;
+  AudioClip fireSound;
 
   public BorneCraftAttack(GameObject ship, GameObject projectile, Configs configs)
   {
@@ -28,6 +31,7 @@ public class BorneCraftAttack
       maxPoolSize: 100,
       prefab: projectile 
     );
+    this.fireSound = Resources.Load<AudioClip>("Audio/short_laser");
   }
 
   public void SetTarget(Transform transform)
@@ -54,6 +58,7 @@ public class BorneCraftAttack
   void Shoot() 
   {
     var projectile = this.projectilePool.Get();
+
     projectile.transform.position = this.ship.transform.position;
     projectile.FiredShip = this.ship;
     projectile.InitialSpeed = this.configs.ProjectileSpeed;
@@ -62,6 +67,11 @@ public class BorneCraftAttack
     if (this.OnShoot != null) {
       this.OnShoot.Invoke();
     }
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.transform.position = this.ship.transform.position;
+    var volume = BorneCraftAttack.ShotVolumeRand.Next(40, 60);
+    sfx.SetVolume((float)volume * 0.01f);
+    sfx.PlaySound(this.fireSound);
   }
 
   void WaitToShoot(float deltaTime)
