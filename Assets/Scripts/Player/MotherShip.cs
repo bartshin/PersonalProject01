@@ -195,14 +195,14 @@ public class MotherShip : MonoBehaviour
 
   void OnEnable()
   {
-    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnSelectedEnemyChanged;
+    CombatManager.Shared.SelectedDamagable.OnChanged += this.OnSelectedEnemyChanged;
     CameraManager.Shared.ActiveSideCamera.OnChanged += this.OnSideCameraChanged;
     CameraManager.Shared.SetPlayerShip(this.transform);
   }
 
   void OnDisable()
   {
-    CombatManager.Shared.SelectedEnemy.OnChanged -= this.OnSelectedEnemyChanged;
+    CombatManager.Shared.SelectedDamagable.OnChanged -= this.OnSelectedEnemyChanged;
     CameraManager.Shared.ActiveSideCamera.OnChanged -= this.OnSideCameraChanged;
     CameraManager.Shared.UnsetPlayerShip();
   }

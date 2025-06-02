@@ -13,17 +13,21 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   }
   // TODO: Change to Deque
   public List<IDamagable> Targets { get; private set; }
-  public ObservableValue<IDamagable> SelectedEnemy { get; private set; }
+  public ObservableValue<IDamagable> SelectedDamagable { get; private set; }
   public (GameObject gameObject, IDamagable damagable) LastHitEnemy;
   public AttackMode CurrentAttackMode = AttackMode.Select;
+  public Dictionary<IDamagable, EnemyShip> enemies;
   int enemyLayer; 
   int maxTargetCount = 3;
 
   public void CancelAttack()
   {
-    if (this.SelectedEnemy.Value != null) {
-      this.AddTargetToFront(this.SelectedEnemy.Value);
-      this.SelectedEnemy.Value = null;
+    if (this.SelectedDamagable.Value != null) {
+      this.AddTargetToFront(this.SelectedDamagable.Value);
+      if (SelectedDamagable.Value != null) {
+        this.OnDeselectDamagable(SelectedDamagable.Value);
+      }
+      this.SelectedDamagable.Value = null;
     }
   }
 
@@ -31,7 +35,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   {
     if (this.Targets.Count > 0) {
       var first = this.Targets[0];
-      this.SelectedEnemy.Value = first;
+      this.SelectedDamagable.Value = first;
       if (this.Targets.Count == 0) {
         return ;
       }
@@ -39,19 +43,20 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
   }
 
-  public void OnSelectEnemy(IDamagable enemy, bool isPrimaryButton)
+  public void OnSelectDamagable(IDamagable damagable, bool isPrimaryButton)
   {
     if (isPrimaryButton) {
-      var index = this.Targets.IndexOf(enemy);
-      if (index != -1) {
-        this.Targets.RemoveAt(index);
-      }
-      else {
-        this.Targets.Add(enemy);
-      }
+      this.OnPrimarySelected(damagable);
     }
     else {
-      this.StartAttack(enemy);
+      this.OnSecondarySelected(damagable);
+    }
+  }
+
+  void OnDeselectDamagable(IDamagable damagable)
+  {
+    if (this.enemies.TryGetValue(damagable, out EnemyShip enemy)) {
+      enemy.OnDeselected();
     }
   }
 
@@ -59,13 +64,14 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   {
     base.OnAwake();
     this.enemyLayer = (1 << LayerMask.NameToLayer("Enemy"));
-    this.SelectedEnemy = new (null);
+    this.SelectedDamagable = new (null);
     this.LastHitEnemy = (null, null);
+    this.enemies = new ();
     this.Targets = new (this.maxTargetCount + 1);
-    this.SelectedEnemy.WillChange += (enemy) => enemy.OnDestroyed -= this.OnEnemyDestroyed;
-    this.SelectedEnemy.OnChanged += (enemy) => {
+    this.SelectedDamagable.WillChange += (enemy) => enemy.OnDestroyed -= this.OnDamagableDestroyed;
+    this.SelectedDamagable.OnChanged += (enemy) => {
       if (enemy != null) {
-        enemy.OnDestroyed += this.OnEnemyDestroyed;
+        enemy.OnDestroyed += this.OnDamagableDestroyed;
       }
     };
   }
@@ -109,11 +115,20 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   {
     if (position != null &&
         this.CurrentAttackMode == AttackMode.Select) {
-      var selectedEnemy = this.FindEnemy(position.Value); 
-      if (selectedEnemy == null) {
+      var damagable = this.FindEnemy(position.Value); 
+      if (damagable == null) {
         return ;
       }
-      this.OnSelectEnemy(selectedEnemy, isPrimaryButton);
+      if (!this.enemies.TryGetValue(damagable, out EnemyShip enemy)) {
+        enemy = damagable.gameObject.GetComponent<EnemyShip>();
+        if (enemy != null) {
+          this.enemies.Add(damagable, enemy);
+        }
+      }
+      if (enemy != null && this.Targets.IndexOf(damagable) == -1) {
+        enemy.OnSelected();
+      }
+      this.OnSelectDamagable(damagable, isPrimaryButton);
     }
   }
 
@@ -135,21 +150,36 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
   }
 
-  void StartAttack(IDamagable target)
+  void OnPrimarySelected(IDamagable damagable)
   {
-    var index = this.Targets.IndexOf(target);
+    var index = this.Targets.IndexOf(damagable);
+    if (index != -1) {
+      this.OnDeselectDamagable(damagable);
+      this.Targets.RemoveAt(index);
+    }
+    else {
+      this.Targets.Add(damagable);
+    }
+  }
+
+  void OnSecondarySelected(IDamagable damagable)
+  {
+    var index = this.Targets.IndexOf(damagable);
     if (index != -1) {
       this.Targets.RemoveAt(index);
     }
-    else if (this.SelectedEnemy.Value != null &&
-        target != this.SelectedEnemy.Value) {
-      this.AddTargetToFront(this.SelectedEnemy.Value); 
+    else if (this.SelectedDamagable.Value != null &&
+        damagable != this.SelectedDamagable.Value) {
+      this.AddTargetToFront(this.SelectedDamagable.Value); 
     }
-    if (target != this.SelectedEnemy.Value) {
-      this.SelectedEnemy.Value = target;
+    if (damagable != this.SelectedDamagable.Value) {
+      this.SelectedDamagable.Value = damagable;
     }
     else {
-      this.SelectedEnemy.Value = null;
+      if (this.enemies.TryGetValue(damagable, out EnemyShip enemy)) {
+        enemy.OnDeselected();
+      }
+      this.SelectedDamagable.Value = null;
     }
   }
 
@@ -171,14 +201,15 @@ public class CombatManager : SingletonBehaviour<CombatManager>
     }
   }
 
-  void OnEnemyDestroyed(IDamagable enemy)
+  void OnDamagableDestroyed(IDamagable damagable)
   {
-    if (this.SelectedEnemy.Value == enemy) {
+    this.enemies.Remove(damagable);
+    if (this.SelectedDamagable.Value == damagable) {
       if (this.Targets.Count > 0) {
-        this.StartAttack(this.Targets[0]);
+        this.OnSecondarySelected(this.Targets[0]);
       }
       else {
-        this.SelectedEnemy.Value = null;
+        this.SelectedDamagable.Value = null;
       }
     }
   }

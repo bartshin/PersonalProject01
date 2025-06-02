@@ -63,7 +63,7 @@ public class CameraManager : SingletonBehaviour<CameraManager>
   void Start()
   {
     this.topviewFollow.position = this.topviewFollowOffset;
-    CombatManager.Shared.SelectedEnemy.OnChanged += this.OnSelectedEnemyChanged;
+    CombatManager.Shared.SelectedDamagable.OnChanged += this.OnSelectedEnemyChanged;
   }
 
   public void SetPlayerShip(Transform player)

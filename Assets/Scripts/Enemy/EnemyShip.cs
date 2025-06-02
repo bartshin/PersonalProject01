@@ -63,6 +63,21 @@ public class EnemyShip : MonoBehaviour
   int playerMotherShipLayer;
   int playerBorneCraftLayer;
 
+  public void OnSelected()
+  {
+    if (this.HpBar != null && !this.HpBar.gameObject.activeSelf) {
+      this.HpBar.gameObject.transform.rotation = Camera.main.transform.rotation;
+      this.HpBar.gameObject.SetActive(true);
+    }
+  }
+
+  public void OnDeselected()
+  {
+    if (this.HpBar != null && this.HpBar.gameObject.activeSelf) {
+      this.HpBar.gameObject.SetActive(false);
+    }
+  }
+
   void Awake()
   {
     if (this.rb == null) {
@@ -137,7 +152,7 @@ public class EnemyShip : MonoBehaviour
     this.health.OnDestroyed += this.OnDestroyed;
     if (this.HpBar != null && this.health != null) {
       this.HpBar.WatchingIntValue = this.health.Hp;
-      //this.HpBar.gameObject.SetActive(false);
+      this.HpBar.gameObject.SetActive(false);
     }
     if (this.HpBarPointerHandler != null) {
       this.HpBarPointerHandler.AddEvent(PointerHandler.PointerEvent.Click, this.OnClickHpbar);
@@ -210,9 +225,6 @@ public class EnemyShip : MonoBehaviour
 
   void OnTakeDamage(int damage, Transform attacker, Nullable<Vector3> attackedPosition)
   {
-    if (this.HpBar != null) {
-      this.HpBar.gameObject.SetActive(true);
-    }
     var attackerDamagble = attacker.gameObject.GetComponent<IDamagable>();
     if (this.target == null && attackerDamagble != null) {
       this.StartCombatWith(attackerDamagble);
@@ -254,7 +266,7 @@ public class EnemyShip : MonoBehaviour
   void OnClickHpbar(PointerEventData eventData)
   {
     if (eventData.button != PointerEventData.InputButton.Middle) {
-      CombatManager.Shared.OnSelectEnemy(this.health,
+      CombatManager.Shared.OnSelectDamagable(this.health,
           eventData.button == PointerEventData.InputButton.Left);
     }
   }
