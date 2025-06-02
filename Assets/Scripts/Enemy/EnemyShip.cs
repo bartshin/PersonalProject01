@@ -23,6 +23,8 @@ public class EnemyShip : MonoBehaviour
   GameObject projectile;
   [SerializeField]
   GameObject destoryedEffect;
+  [SerializeField]
+  GauageImageUI HpBar;
 
   [Header("Movement Configs")]
   [SerializeField]
@@ -130,6 +132,9 @@ public class EnemyShip : MonoBehaviour
   {
     this.health.OnTakeDamage += this.OnTakeDamage;
     this.health.OnDestroyed += this.OnDestroyed;
+    if (this.HpBar != null && this.health != null) {
+      this.HpBar.WatchingIntValue = this.health.Hp;
+    }
   }
 
   void Update()
