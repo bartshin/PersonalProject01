@@ -8,6 +8,9 @@ public interface IDamagable
 
   public int TakeDamage(int attackDamage);
   public int TakeDamage(int attackDamage, Transform attacker);
+  public virtual int TakeDamage(int attackDamage, Transform attacker, Vector3 attackedPosition) {
+    return (this.TakeDamage(attackDamage, attacker));
+  }
   public Action<IDamagable> OnDestroyed { get; set; }
   public Action<IDamagable> OnDisabled { get; set; }
   public GameObject gameObject { get; }

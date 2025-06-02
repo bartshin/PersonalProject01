@@ -5,6 +5,8 @@ using Architecture;
 
 public class Missile : BaseProjectile, IPooedObject
 {
+  static readonly System.Random ROTATE_RAND = new ();
+  static readonly (int min, int max) ROTATE_RANGE = (70, 90);
   public float Acceleration;
   public Action<IPooedObject> OnDisabled 
   { 
@@ -24,11 +26,19 @@ public class Missile : BaseProjectile, IPooedObject
 
   Action<Missile> onDisabled;
   Vector3 velocity;
+  Vector3 rotation;
 
   override protected void OnEnable()
   {
     base.OnEnable();
     this.velocity = this.Direction * this.InitialSpeed;
+    var zRotation = Missile.ROTATE_RAND.Next(
+      Missile.ROTATE_RANGE.min,
+      Missile.ROTATE_RANGE.max
+    );
+    this.rotation = new Vector3(
+      0, 0, (float)zRotation * (zRotation % 2 == 0 ? -1: 1)
+    );
   }
 
   void Update()
@@ -36,6 +46,10 @@ public class Missile : BaseProjectile, IPooedObject
     this.remainingLifeTime -= Time.deltaTime;
     this.velocity += this.Direction * this.Acceleration * Time.deltaTime;
     this.transform.position += this.velocity;
+
+    this.transform.Rotate(
+      this.rotation * Time.deltaTime
+    );
     if (this.remainingLifeTime < 0) {
       this.DestroySelf();
     }

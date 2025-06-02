@@ -5,19 +5,37 @@ using Architecture;
 
 public class MotherShipHealth : ShipHealth
 {
+  static readonly (int min, int max) SHIELD_HIT_VOLUME = (20, 30);
+  static readonly (int min, int max) HIT_VOLUME = (10, 15);
+  static readonly (int min, int max) SHIELD_HIT_EFFECT_SCALE = (3, 5);
+  static readonly (int min, int max) HIT_EFFECT_SCALE = (10, 20);
+  static readonly System.Random SCALE_RAND = new ();
+  const float HIT_EFFECT_LIFE_TIME = 1f;
+
   [Header("References")]
   [SerializeField]
   StatusController status;
+  [SerializeField]
+  AudioClip hitSound;
+  [SerializeField]
+  AudioClip shieldHitSound;
+  [SerializeField]
+  GameObject shieldHitEffect;
+  [SerializeField]
+  GameObject hitEffect;
 
   [Header("Configs")]
   [SerializeField]
   int maxBarrier;
   [SerializeField]
   int barrierRestore;
-  ObservableValue<(int current, int max)> Barrier;
+  public ObservableValue<(int current, int max)> Barrier;
   (float current, float max) innerBarrier;
   [SerializeField]
   float barrierEfficiency;
+
+  MonoBehaviourPool<BaseExplosion> shieldHitEffectPool;
+  MonoBehaviourPool<BaseExplosion> hitEffectPool;
 
   override protected void Awake()
   {
@@ -27,6 +45,17 @@ public class MotherShipHealth : ShipHealth
     }
     this.Barrier = new ((this.maxBarrier, this.maxBarrier));
     this.innerBarrier = ((float)this.maxBarrier, (float) this.maxBarrier);
+    this.OnTakeDamage += this.OnTakeDamageFrom;
+    this.shieldHitEffectPool = new (
+      poolSize: 10,
+      maxPoolSize: 30,
+      prefab: this.shieldHitEffect
+    );
+    this.hitEffectPool = new (
+      poolSize: 10,
+      maxPoolSize: 30,
+      prefab: this.hitEffect
+    );
   }
 
   void Start()
@@ -87,5 +116,54 @@ public class MotherShipHealth : ShipHealth
   protected override void OnRunoutHp()
   {
     Debug.Log("player died");
+  }
+
+  void OnTakeDamageFrom(int damage, Transform attacker, Nullable<Vector3> attackedPosition) 
+  {
+    if (this.Barrier.Value.current > 0) {
+      this.OnDamagedToShield(attackedPosition);
+    }
+    else 
+    {
+      this.OnDamagedToHp(attackedPosition);
+    }
+  }
+
+  void OnDamagedToHp(Nullable<Vector3> attackedPosition)
+  {
+    var pos = attackedPosition ?? this.gameObject.transform.position;
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.PlaySound(
+      this.hitSound,
+      attackedPosition ?? this.transform.position,
+      MotherShipHealth.HIT_VOLUME
+    );
+    this.SpawnHitEffect(
+      this.hitEffectPool, pos, MotherShipHealth.HIT_EFFECT_SCALE);
+  }
+
+  void OnDamagedToShield(Nullable<Vector3> attackedPosition)
+  {
+    var pos = attackedPosition ?? this.gameObject.transform.position;
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.PlaySound(
+      this.shieldHitSound,
+      attackedPosition ?? this.transform.position,
+      MotherShipHealth.SHIELD_HIT_VOLUME
+    );
+    this.SpawnHitEffect(
+      this.shieldHitEffectPool, pos, MotherShipHealth.SHIELD_HIT_EFFECT_SCALE);
+  }
+
+  void SpawnHitEffect(MonoBehaviourPool<BaseExplosion> pool, Vector3 position, (int min, int max) scaleRange)
+  {
+    var effect = pool.Get();
+    Debug.Log(effect);
+    effect.transform.position = position;
+    effect.LifeTime = MotherShipHealth.HIT_EFFECT_LIFE_TIME;
+    var scale = MotherShipHealth.SCALE_RAND.Next(
+        scaleRange.min, scaleRange.max);
+    effect.transform.localScale = new Vector3(
+      scale, scale, scale);
   }
 }

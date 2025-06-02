@@ -245,6 +245,6 @@ public class BorneCraft : MonoBehaviour
       );
   }
 
-  void OnTakeDamageFrom(int damage, Transform attacker) 
+  void OnTakeDamageFrom(int damage, Transform attacker, Nullable<Vector3> attackedPosition) 
   {}
 }

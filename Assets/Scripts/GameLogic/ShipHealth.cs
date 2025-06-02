@@ -11,7 +11,7 @@ public class ShipHealth : MonoBehaviour, IDamagable
   protected int maxHp;
   [SerializeField]
   protected int defense;
-  public Action<int, Transform> OnTakeDamage;
+  public Action<int, Transform, Nullable<Vector3>> OnTakeDamage;
   public float WaitToDestroy = 4f;
   public Action<IDamagable> OnDestroyed { get; set; }
   public Action<IDamagable> OnDisabled { get; set; }
@@ -36,7 +36,7 @@ public class ShipHealth : MonoBehaviour, IDamagable
   {
     var damage = (this.GetDamaged(attackDamage));
     if (this.OnTakeDamage != null) {
-      this.OnTakeDamage.Invoke(damage, null);
+      this.OnTakeDamage.Invoke(damage, null, null);
     }
     if (damage > 0 && this.Hp.Value.current <= 0) {
       this.OnRunoutHp();
@@ -48,7 +48,19 @@ public class ShipHealth : MonoBehaviour, IDamagable
   {
     var damage = this.GetDamaged(attackDamage);
     if (this.OnTakeDamage != null) {
-      this.OnTakeDamage.Invoke(damage, attacker);
+      this.OnTakeDamage.Invoke(damage, attacker, null);
+    }
+    if (damage > 0 && this.Hp.Value.current <= 0) {
+      this.OnRunoutHp();
+    }
+    return (damage);
+  }
+
+  public virtual int TakeDamage(int attackDamage, Transform attacker, Vector3 attackedPostion)
+  {
+    var damage = this.GetDamaged(attackDamage);
+    if (this.OnTakeDamage != null) {
+      this.OnTakeDamage.Invoke(damage, attacker, attackedPostion);
     }
     if (damage > 0 && this.Hp.Value.current <= 0) {
       this.OnRunoutHp();

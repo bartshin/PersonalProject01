@@ -5,9 +5,28 @@ using Architecture;
 
 public class MotherShipSideAttack 
 {
+  const float MUZZLE_FLASH_LIFETIME = 0.5f;
+  const float MISSILE_EXPLOSION_LIFETIME = 0.5f;
+  static readonly Vector3 MISSILE_EXPLOSION_SCALE = new Vector3(5f, 5f, 5f);
+  static readonly System.Random VOLUME_RAND;
+  static readonly (int min, int max)  MISSILE_LAUNCH_VOLUME = (40, 60);
+  static readonly (int min, int max)  MISSILE_HIT_VOLUME = (40, 60);
+  static readonly (int min, int max)  BULLET_FIRE_VOLUME = (70, 80);
+  static readonly (int min, int max)  BULLET_HIT_VOLUME = (40, 60);
   static readonly Vector3 MUZZLE_FLASH_SCALE = new Vector3(1.5f, 1.5f, 1.5f);
   static readonly Vector3 MUZZLE_OFFSET = new Vector3(0, -0.5f, 0);
-  const float MUZZLE_FLASH_LIFETIME = 0.5f;
+  static readonly AudioClip bulletFireSound;
+  static readonly AudioClip bulletHitSound;
+  static readonly AudioClip missileLaunchSound;
+  static readonly AudioClip missileHitSound;
+  static MotherShipSideAttack()
+  {
+    MotherShipSideAttack.VOLUME_RAND = new();
+    MotherShipSideAttack.bulletFireSound = Resources.Load<AudioClip>("Audio/soft_laser_blast");
+    MotherShipSideAttack.missileLaunchSound = Resources.Load<AudioClip>("Audio/missile_firing");
+    MotherShipSideAttack.bulletHitSound = Resources.Load<AudioClip>("Audio/bullet_hit");
+    MotherShipSideAttack.missileHitSound = Resources.Load<AudioClip>("Audio/missile_hit");
+  }
   public struct Configs
   {
     public float BulletDelay;
@@ -39,8 +58,6 @@ public class MotherShipSideAttack
   (float bullet, float missile) remainingDelay;
   (float xAngle, float yDot) maxRotation = (30f, 0.7f);
   float rotationClampAngle = 45f;
-  AudioClip bulletSound;
-  AudioClip missileSound;
   MonoBehaviourPool<PlayerBullet> bulletPool;
   MonoBehaviourPool<Missile> missilePool;
   MonoBehaviourPool<SimplePooledObject> missileExplosionPool;
@@ -59,8 +76,6 @@ public class MotherShipSideAttack
   { 
     this.ship = ship;
     this.configs = configs;
-    this.bulletSound = Resources.Load<AudioClip>("Audio/soft_laser_blast");
-    this.missileSound = Resources.Load<AudioClip>("Audio/missile_firing");
     this.bulletPool = new (
       poolSize: 30,
       maxPoolSize: 100,
@@ -123,7 +138,16 @@ public class MotherShipSideAttack
     projectile.LifeTime = this.configs.MissileLifeTime;
     projectile.Acceleration = this.configs.MissileAcceleration;
     projectile.FiredShip = this.ship;
-    this.PlayBulletSound(this.missileSound);
+    projectile.OnHit = this.OnMissileHit;
+    var volume = MotherShipSideAttack.VOLUME_RAND.Next(
+      MotherShipSideAttack.MISSILE_LAUNCH_VOLUME.min,
+      MotherShipSideAttack.MISSILE_LAUNCH_VOLUME.max
+    );
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.PlaySound(
+      MotherShipSideAttack.missileLaunchSound, 
+      this.ship.transform.position,
+      MotherShipSideAttack.MISSILE_LAUNCH_VOLUME);
   }
 
   void FireBullet()
@@ -138,6 +162,7 @@ public class MotherShipSideAttack
     projectile.Direction = this.AimDirection * Vector3.forward;
     projectile.LifeTime = this.configs.BulletLifeTime;
     projectile.FiredShip = this.ship;
+    projectile.OnHit = this.OnBulletHit;
     var muzzleFlash = this.muzzleFlashPool.Get();
     muzzleFlash.transform.position = this.ship.transform.position + MotherShipSideAttack.MUZZLE_OFFSET + (this.fireDist + 2f) * dir;
     muzzleFlash.transform.forward = Vector3.Lerp(
@@ -146,14 +171,39 @@ public class MotherShipSideAttack
           0.65f);
     muzzleFlash.transform.localScale = MotherShipSideAttack.MUZZLE_FLASH_SCALE;
     muzzleFlash.LifeTime = MotherShipSideAttack.MUZZLE_FLASH_LIFETIME;
-    this.PlayBulletSound(this.bulletSound);
+    var volume = MotherShipSideAttack.VOLUME_RAND.Next(
+      MotherShipSideAttack.BULLET_FIRE_VOLUME.min,
+      MotherShipSideAttack.BULLET_FIRE_VOLUME.max
+    );
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.PlaySound(
+      MotherShipSideAttack.bulletFireSound,
+      this.ship.transform.position,
+      MotherShipSideAttack.BULLET_FIRE_VOLUME);
   }
 
-  void PlayBulletSound(AudioClip clip)
+  void OnMissileHit(BaseProjectile projectile, Collider target)
+  {
+    var explosion = this.missileExplosionPool.Get();
+    explosion.transform.position = projectile.transform.position;
+    explosion.LifeTime = MotherShipSideAttack.MISSILE_EXPLOSION_LIFETIME;
+    explosion.transform.localScale = MotherShipSideAttack.MISSILE_EXPLOSION_SCALE;
+    var sfx = AudioManager.Shared.GetSfxController();
+    sfx.PlaySound(
+      MotherShipSideAttack.missileHitSound,
+      projectile.transform.position,
+      MotherShipSideAttack.MISSILE_HIT_VOLUME
+    );
+  }
+
+  void OnBulletHit(BaseProjectile projectile, Collider target)
   {
     var sfx = AudioManager.Shared.GetSfxController();
-    sfx.transform.position = this.ship.transform.position;
-    sfx.PlaySound(clip);
+    sfx.PlaySound(
+      MotherShipSideAttack.bulletHitSound,
+      target.transform.position,
+      MotherShipSideAttack.BULLET_HIT_VOLUME
+    );
   }
 
   void ClampAim(float deltaTime)

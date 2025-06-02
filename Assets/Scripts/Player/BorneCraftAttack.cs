@@ -24,7 +24,7 @@ public class BorneCraftAttack
   float remainDelay;
   GameObject ship;
   Transform targetTransform;
-  MonoBehaviourPool<Laser> projectilePool;
+  MonoBehaviourPool<PlayerLaser> projectilePool;
   MonoBehaviourPool<SimplePooledObject> explosionPool;
   static readonly AudioClip fireSound;
   static readonly AudioClip explosionSound;
@@ -32,7 +32,7 @@ public class BorneCraftAttack
   static BorneCraftAttack()
   {
     BorneCraftAttack.fireSound = Resources.Load<AudioClip>("Audio/short_laser");
-    BorneCraftAttack.explosionSound = Resources.Load<AudioClip>("Audio/laser_explosion");
+    BorneCraftAttack.explosionSound = Resources.Load<AudioClip>("Audio/soft_laser_hit");
   }
 
   public BorneCraftAttack(GameObject ship, GameObject projectile, GameObject explosion, Configs configs)

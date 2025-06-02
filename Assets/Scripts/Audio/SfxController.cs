@@ -7,8 +7,20 @@ public class SfxController : MonoBehaviour, IPooedObject
 {
   public Action<IPooedObject> OnDisabled { get; set; }
   AudioSource source;
+  static readonly System.Random VOLUME_RAND = new ();
 
   float remainingPlayTime;
+
+  public void PlaySound(AudioClip clip, Vector3 position, (int min, int max) volumeRange)
+  {
+    var volume = SfxController.VOLUME_RAND.Next(
+      volumeRange.min,
+      volumeRange.max
+    );
+    this.transform.position = position;
+    this.SetVolume(volume);
+    this.PlaySound(clip);
+  }
 
   public void PlaySound(AudioClip clip)
   {

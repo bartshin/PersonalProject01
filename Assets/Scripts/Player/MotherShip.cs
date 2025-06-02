@@ -5,11 +5,14 @@ using Cinemachine;
 
 public class MotherShip : MonoBehaviour
 {
+
   [Header("References")]
   [SerializeField]
   GameObject interior;
   [SerializeField]
   StatusController status;
+  [SerializeField]
+  MotherShipHealth health;
   [SerializeField]
   Rigidbody rb;
   [SerializeField]
@@ -96,6 +99,9 @@ public class MotherShip : MonoBehaviour
     }
     if (this.status == null) {
       this.status = this.GetComponent<StatusController>();
+    }
+    if (this.health == null) {
+      this.health = this.GetComponent<MotherShipHealth>();
     }
     this.movement = this.InitMovement();
     this.sideAttack = this.InitSideAttack();

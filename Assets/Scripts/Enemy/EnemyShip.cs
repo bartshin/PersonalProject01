@@ -49,6 +49,8 @@ public class EnemyShip : MonoBehaviour
   int shootDamage;
   [SerializeField]
   float projectileSpeed;
+  [SerializeField]
+  float projectileLifeTime;
 
   EnemyShipAttack attack;
   EnemyShipMovement movement;
@@ -96,6 +98,7 @@ public class EnemyShip : MonoBehaviour
       ShootRange = this.shootRange,
       ShootDamage = this.shootDamage,
       ProjectileSpeed = this.projectileSpeed,
+      ProjectileLifetTime = this.projectileLifeTime
     });
   }
 
@@ -193,7 +196,7 @@ public class EnemyShip : MonoBehaviour
     this.attack.TargetDistance = this.targetDistance;
   }
 
-  void OnTakeDamage(int damage, Transform attacker)
+  void OnTakeDamage(int damage, Transform attacker, Nullable<Vector3> attackedPosition)
   {
     var attackerDamagble = attacker.gameObject.GetComponent<IDamagable>();
     if (this.target == null && attackerDamagble != null) {
