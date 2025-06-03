@@ -5,6 +5,16 @@ using Architecture;
 
 public class StatusController : MonoBehaviour
 {
+  public enum Field
+  {
+    Barrier,
+    Speed,
+    Booster,
+    Battery
+  }
+  public static readonly Field[] ALL_FIELDS = (Field[])Enum.GetValues(typeof(Field));
+  public const int MAX_FIELD_VALUE = 5;
+
   public class PowerDistribution
   {
 
@@ -12,21 +22,27 @@ public class StatusController : MonoBehaviour
     public ObservableValue<int> MotherShipBarrier { get; private set; }
     public ObservableValue<int> MotherShipSpeed { get; private set; }
     public ObservableValue<int> MotherShipBooster { get; private set; }
-    public ObservableValue<int> CraftshipBarrier { get; private set; }
+    public ObservableValue<int> CraftshipBattery { get; private set; }
+    public ObservableValue<int> ExtraPower { get; private set; }
 
     public PowerDistribution(
       int maxPower,
       int motherShipBarrier,
       int motherShipSpeed,
       int motherShipBooster,
-      int craftshipBarrier
+      int craftshipBattery
     )
     {
       this.MaxPower = maxPower;
       this.MotherShipBarrier = new (motherShipBarrier);
       this.MotherShipSpeed = new (motherShipSpeed);
       this.MotherShipBooster = new (motherShipBooster);
-      this.CraftshipBarrier = new (craftshipBarrier);
+      this.CraftshipBattery = new (craftshipBattery);
+      this.ExtraPower = new (maxPower - motherShipBarrier - motherShipSpeed - motherShipBooster - craftshipBattery
+      );
+      if (this.ExtraPower.Value < 0) {
+        throw new ApplicationException("ExtraPower less than zero");
+      }
     }
 
     public void SetPower(int power)
@@ -35,6 +51,8 @@ public class StatusController : MonoBehaviour
       this.MaxPower = power;
     }
   }
+
+
 
   public PowerDistribution Distribution 
   { 
@@ -62,13 +80,43 @@ public class StatusController : MonoBehaviour
       motherShipBarrier: this.distributionConfigs.MotherShipBarrier,
       motherShipSpeed: this.distributionConfigs.MotherShipSpeed,
       motherShipBooster: this.distributionConfigs.MotherShipBooster,
-      craftshipBarrier: this.distributionConfigs.CraftshipBarrier
+      craftshipBattery: this.distributionConfigs.CraftshipBattery
     );
   }
 
   // Start is called before the first frame update
   void Start()
   {
+    UserInputManager.Shared.NavigateDirection.OnChanged += this.OnNavigationChanged;
+    UIManager.Shared.SetDistribution(this.distribution);
+  }
+
+  void OnNavigationChanged(Nullable<Direction> direction)
+  {
+    if (direction == null || 
+        direction == Direction.Left ||
+        direction == Direction.Right) {
+      return ;
+    }
+    var selected = UIManager.Shared.SelectedField;
+    var field = selected switch  {
+      Field.Barrier => this.distribution.MotherShipBarrier,
+      Field.Speed => this.distribution.MotherShipSpeed,
+      Field.Booster => this.distribution.MotherShipBooster,
+      Field.Battery => this.distribution.CraftshipBattery,
+      _ => throw new NotImplementedException()
+    };
+    var extraPower = this.distribution.ExtraPower.Value;
+    Debug.Log(extraPower);
+    if (field.Value > 0 && direction == Direction.Down) {
+      field.Value -= 1;
+      this.distribution.ExtraPower.Value += 1;
+    }
+    else if (field.Value < StatusController.MAX_FIELD_VALUE &&
+      direction == Direction.Up && extraPower > 0) {
+      field.Value += 1;
+      this.distribution.ExtraPower.Value -= 1;
+    }
   }
 
   // Update is called once per frame
@@ -83,7 +131,7 @@ public class StatusController : MonoBehaviour
       this.Distribution.MotherShipBarrier.Value = this.distributionConfigs.MotherShipBarrier;
       this.Distribution.MotherShipSpeed.Value = this.distributionConfigs.MotherShipSpeed;
       this.Distribution.MotherShipBooster.Value = this.distributionConfigs.MotherShipBooster;
-      this.Distribution.CraftshipBarrier.Value = this.distributionConfigs.CraftshipBarrier;
+      this.Distribution.CraftshipBattery.Value = this.distributionConfigs.CraftshipBattery;
     }
   }
 
@@ -94,6 +142,6 @@ public class StatusController : MonoBehaviour
     public int MotherShipBarrier; 
     public int MotherShipSpeed;
     public int MotherShipBooster;
-    public int CraftshipBarrier;
+    public int CraftshipBattery;
   }
 }

@@ -190,7 +190,7 @@ public class MotherShip : MonoBehaviour
     this.status.Distribution.MotherShipSpeed.OnChanged += this.SetMovementSpeedPower;
     this.SetBoosterPower(this.status.Distribution.MotherShipBooster.Value);
     this.status.Distribution.MotherShipBooster.OnChanged += this.SetBoosterPower;
-    this.SetCraftshipBarrierPower(this.status.Distribution.CraftshipBarrier.Value);
+    this.SetCraftshipBarrierPower(this.status.Distribution.CraftshipBattery.Value);
     this.status.Distribution.MotherShipBarrier.OnChanged += this.SetCraftshipBarrierPower;
     this.interior.transform.localPosition = CameraManager.Shared.SideviewOffset;
     this.ShowStatusUI();

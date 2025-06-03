@@ -7,7 +7,7 @@ using Architecture;
 public class UIManager : SingletonBehaviour<UIManager>
 {
   public static readonly Color CRAFTSHIP_PORTRAIT_BACKGROUND_COLOR = new Color(
-      51f/255f, 51f/255f, 51f/255f);
+      51f/255f, 51f/255f, 51f/255f, 0.5f);
   CombatUI combatUI;
 
   public enum PopupUI
@@ -16,6 +16,7 @@ public class UIManager : SingletonBehaviour<UIManager>
     LevelUp,
     StageEnd
   }
+  public StatusController.Field SelectedField => this.combatUI.SelectedField;
   GameObject combatUIPrefab;
   GameObject loadingUIPrefab;
   public RenderTexture[] CraftshipTextures => this.combatUI.CraftshipTextures;
@@ -24,6 +25,8 @@ public class UIManager : SingletonBehaviour<UIManager>
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier) motherShip,
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftships
       ) => this.combatUI.SetHp(motherShip, borneCraftships);
+
+  public void SetDistribution(StatusController.PowerDistribution distribution) => this.combatUI.SetPowerDistribution(distribution);
 
   public void ShowCraftshipPortrait(int index) => this.combatUI.SetCraftshipPortraitVisible(index, true);
 

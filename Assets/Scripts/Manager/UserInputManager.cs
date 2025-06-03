@@ -42,8 +42,9 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
     }
   }
 
-  public ObservableValue<Nullable<Vector2>> PrimarySelectedScreenPosition;
-  public ObservableValue<Nullable<Vector2>> SecondarySelectedScreenPosition;
+  public ObservableValue<Nullable<Vector2>> PrimarySelectedScreenPosition { get; private set; }
+  public ObservableValue<Nullable<Vector2>> SecondarySelectedScreenPosition { get; private set; }
+  public ObservableValue<Nullable<Direction>> NavigateDirection { get; private set; }
   public Vector3 DirectionInput { get; private set; }
   public Vector2 PointerDelta { get; private set; }
   public bool IsBoosting { get; private set; }
@@ -64,11 +65,13 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
   InputAction secondarySelect;
   InputAction speedUp;
   InputAction look;
+  InputAction navigate;
 
   void Awake()
   {
     base.OnAwake();
     this.IsUsingPointer = true;
+    this.NavigateDirection = new (null);
     this.move = InputSystem.actions.FindAction("Move");
     this.primarySelect = InputSystem.actions.FindAction("PrimarySelect");
     this.secondarySelect = InputSystem.actions.FindAction("SecondarySelect");
@@ -78,6 +81,7 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
       InputSystem.actions.FindAction("MainAction"));
     this.SubOperation = new Operation(InputSystem.actions.FindAction("SubAction"));
     this.PrimarySelectedScreenPosition = new (null);
+    this.navigate = InputSystem.actions.FindAction("Navigate");
     this.SecondarySelectedScreenPosition = new (null);
   }
 
@@ -102,6 +106,28 @@ public class UserInputManager : SingletonBehaviour<UserInputManager>
     this.SubOperation.Update();
     this.DirectionInput = this.move.ReadValue<Vector3>();
     this.IsBoosting = this.speedUp.IsPressed();
+    var navigateInput = this.navigate.ReadValue<Vector2>();
+    this.SetNavigateDirection(navigateInput);
+  }
+
+  void SetNavigateDirection(Vector2 input)
+  {
+    if (input == Vector2.zero) { 
+      this.NavigateDirection.Value = null;
+      return ;
+    }
+    if (input.x > float.Epsilon) {
+      this.NavigateDirection.Value = Direction.Right; 
+    }
+    else if (input.x < -float.Epsilon) {
+      this.NavigateDirection.Value = Direction.Left; 
+    }
+    else if (input.y > float.Epsilon) {
+      this.NavigateDirection.Value = Direction.Up;
+    }
+    else if (input.y < -float.Epsilon) {
+      this.NavigateDirection.Value = Direction.Down;
+    }
   }
 
   void OnDisable()

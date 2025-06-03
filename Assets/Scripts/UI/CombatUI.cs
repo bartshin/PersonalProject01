@@ -9,11 +9,13 @@ public class CombatUI : MonoBehaviour
   public const string PREFAB_NAME = "CombatUI";
   public bool IsShowing { get; private set; }
   public RenderTexture[] CraftshipTextures => this.hpView.CraftshipTextures;
+  public StatusController.Field SelectedField => StatusController.ALL_FIELDS[this.statusControlView.CursorIndex];
   ObservableValue<(int, int)> motherShipHp;
   ObservableValue<(int, int)>[] borneCraftshipsHp;
   const string CONTAINER_NAME = "combatUI-container";
   VisualElement root;
   PlayerHpView hpView;
+  StatusControlView statusControlView;
 
   public void Show() 
   { 
@@ -29,10 +31,41 @@ public class CombatUI : MonoBehaviour
     this.root.SendToBack();
   }
 
+  public void SetPowerDistribution(StatusController.PowerDistribution distribution)
+  {
+    distribution.MotherShipBarrier.OnChanged += this.OnBarrierPowerChanged;
+    this.OnBarrierPowerChanged(distribution.MotherShipBarrier.Value);
+    distribution.MotherShipBooster.OnChanged += this.OnBoosterPowerChanged;
+    this.OnBoosterPowerChanged(distribution.MotherShipBooster.Value);
+    distribution.MotherShipSpeed.OnChanged += this.OnSpeedPowerChanged;
+    this.OnSpeedPowerChanged(distribution.MotherShipSpeed.Value);
+    distribution.CraftshipBattery.OnChanged += this.OnBatteryPowerChanged;
+    this.OnBatteryPowerChanged(distribution.CraftshipBattery.Value);
+
+    distribution.ExtraPower.OnChanged += this.OnExtraPowerChanged;
+    this.OnExtraPowerChanged(distribution.ExtraPower.Value);
+  }
+
+  void OnBarrierPowerChanged(int power) =>
+    this.statusControlView.SetFieldValue(StatusController.Field.Barrier, power);
+  
+  void OnBoosterPowerChanged(int power) =>
+    this.statusControlView.SetFieldValue(StatusController.Field.Booster, power);
+
+  void OnSpeedPowerChanged(int power) =>
+    this.statusControlView.SetFieldValue(StatusController.Field.Speed, power);
+
+  void OnBatteryPowerChanged(int power) =>
+    this.statusControlView.SetFieldValue(StatusController.Field.Battery, power);
+
+  void OnExtraPowerChanged(int power) =>
+    this.statusControlView.SetExtraValue(power);
+
   public void SetCraftshipPortraitVisible(int index, bool visible)
   {
-    var portrait = this.hpView.CraftshipPortrait[index];
+    var (portrait, placeholder) = this.hpView.CraftshipPortrait[index];
     this.hpView.SetHiddenTo(portrait, !visible);
+    this.hpView.SetHiddenTo(placeholder, visible);
   }
 
   public void SetHp(
@@ -55,12 +88,25 @@ public class CombatUI : MonoBehaviour
   {
     this.Init();
     this.CreateUI();
+    UserInputManager.Shared.NavigateDirection.OnChanged += this.OnNavigationChanged;
+  }
+
+  void OnNavigationChanged(Nullable<Direction> dir)
+  {
+    if (dir == Direction.Left) {
+      this.statusControlView.MoveCursorToPrev();
+    }
+    else if (dir == Direction.Right) {
+      this.statusControlView.MoveCursorToNext();
+    }
   }
 
   void CreateUI()
   {
     this.hpView = new();
     this.root.Add(this.hpView);
+    this.statusControlView = new();
+    this.root.Add(this.statusControlView);
   }
 
   // Update is called once per frame

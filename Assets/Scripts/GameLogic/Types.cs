@@ -2,5 +2,7 @@
 public enum Direction
 {
   Left,
-  Right
+  Right,
+  Up,
+  Down
 }

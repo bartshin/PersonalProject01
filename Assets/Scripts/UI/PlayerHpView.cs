@@ -16,6 +16,7 @@ public class PlayerHpView : VisualElement
   const string MOTHERSHIP_STATUS_CONTAINER = "mothership-status-container";
   const string CRAFTSHIP_STATUS_CONTAINER = "bornecraft-ship-status-container";
   const string CRAFT_PORTRAIT_IMAGE = "bornecraft-portrait-image";
+  const string CRAFT_PORTRAIT_PLACEHOLDER = "bornecraft-portrait-placeholder";
   const string STATUS_CONTAINER_LABEL = "status-container-label";
   const string CRAFT_CONTEINR_LABEL = "bornecraft-container-label";
   const string BAR_CONTAINER = "bar-container";
@@ -30,7 +31,8 @@ public class PlayerHpView : VisualElement
   readonly static Vector2Int CRAFTSHIP_TEXTURE_SIZE = new (128, 128);
 
   public RenderTexture[] CraftshipTextures { get; private set; }
-  public VisualElement[] CraftshipPortrait { get; private set; }
+  public (VisualElement portrait, VisualElement placeHolder)[] CraftshipPortrait { get; private set; }
+  public VisualElement[] CraftshipPlaceholder { get; private set; }
   public (VisualElement hp, VisualElement barrier) MotherShipHandle { get; private set; }
   public (VisualElement hp, VisualElement barrier)[] CraftshipHpHandles { get; private set; }
 
@@ -59,7 +61,7 @@ public class PlayerHpView : VisualElement
   {
     this.CreateBronecraftTextures(bornecraftshipCount);
     this.CraftshipHpHandles = new (VisualElement, VisualElement)[bornecraftshipCount];
-    this.CraftshipPortrait = new VisualElement[bornecraftshipCount];
+    this.CraftshipPortrait = new (VisualElement, VisualElement)[bornecraftshipCount];
     var bornecraftshipsHpView = new VisualElement();
     bornecraftshipsHpView.name = PlayerHpView.CRAFTSHIPS_STATUS_VIEW;
     for (int i = 0; i < bornecraftshipCount; ++i) {
@@ -123,7 +125,11 @@ public class PlayerHpView : VisualElement
       Background.FromRenderTexture(this.CraftshipTextures[number])
     );
     container.Add(portraitImage);
-    this.CraftshipPortrait[number] = portraitImage;
+    var placeHolder = new VisualElement();
+    placeHolder.AddToClassList(PlayerHpView.CRAFT_PORTRAIT_IMAGE);
+    placeHolder.AddToClassList(PlayerHpView.CRAFT_PORTRAIT_PLACEHOLDER);
+    container.Add(placeHolder);
+    this.CraftshipPortrait[number] = (portraitImage, placeHolder);
 
     var hpBar = this.CreateBar(
        labelText: null,
