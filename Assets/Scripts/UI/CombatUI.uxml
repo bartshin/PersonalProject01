@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/CombatUI.uss?fileID=7433441132597879392&amp;guid=863ac7fb26f041db9afa3dca129e9346&amp;type=3#CombatUI" />
+    <Style src="project://database/Assets/Scripts/UI/PlayerHpView.uss?fileID=7433441132597879392&amp;guid=a04d8fea597be7d569f578f38c70243a&amp;type=3#PlayerHpView" />
+</ui:UXML>

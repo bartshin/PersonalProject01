@@ -15,14 +15,12 @@ public class ShipHealth : MonoBehaviour, IDamagable
   public float WaitToDestroy = 4f;
   public Action<IDamagable> OnDestroyed { get; set; }
   public Action<IDamagable> OnDisabled { get; set; }
-
-    public ObservableValue<(int current, int max)> Hp;
-
+  public ObservableValue<(int current, int max)> Hp = new ();
 
   protected virtual void Awake()
   {
     IDamagable.Register(this.gameObject, this);
-    this.Hp = new((this.maxHp, this.maxHp));
+    this.Hp.Value = (this.maxHp, this.maxHp);
   }
 
   protected virtual void OnDisable()

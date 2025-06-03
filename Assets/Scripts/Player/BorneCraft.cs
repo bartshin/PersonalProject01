@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Architecture;
 
 public class BorneCraft : MonoBehaviour
 {
@@ -56,6 +57,8 @@ public class BorneCraft : MonoBehaviour
   float projectileLifeTime;
 
   public Action<BorneCraft> OnReturned;
+  public ObservableValue<(int, int)> Hp => this.health.Hp;
+  public ObservableValue<(int, int)> Barrier => this.health.Barrier ;
   public Configs CraftConfigs 
   {
     get => this.configs;

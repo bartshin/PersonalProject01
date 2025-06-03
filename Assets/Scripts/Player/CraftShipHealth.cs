@@ -8,7 +8,7 @@ public class CraftShipHealth : ShipHealth
   [SerializeField]
   public int MaxBarrier; 
 
-  public ObservableValue<(int current, int max)> Barrier { get; private set; }
+  public ObservableValue<(int current, int max)> Barrier { get; private set; } = new ();
   public Action<CraftShipHealth> OnPowerDown;
 
   public int RestoreBarrier(int amount)
@@ -31,7 +31,7 @@ public class CraftShipHealth : ShipHealth
   protected override void Awake()
   {
     base.Awake();
-    this.Barrier = new ((this.MaxBarrier, this.MaxBarrier));
+    this.Barrier.Value = (this.MaxBarrier, this.MaxBarrier);
   }
 
   protected override int GetDamaged(int attackDamage)
@@ -49,7 +49,7 @@ public class CraftShipHealth : ShipHealth
 
   protected override void OnRunoutHp()
   {
-      Debug.Log($"{this.gameObject.name} Destroyed");
+    Debug.Log($"{this.gameObject.name} Destroyed");
     if (this.OnPowerDown != null) {
       this.OnPowerDown.Invoke(this);
     }

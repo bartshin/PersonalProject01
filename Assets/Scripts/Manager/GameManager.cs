@@ -17,6 +17,7 @@ public class GameManager : SingletonBehaviour<GameManager>
     CameraManager.CreateInstance();
     UserInputManager.CreateInstance();
     AudioManager.CreateInstance();
+    UIManager.CreateInstance();
   }
   // Start is called before the first frame update
   void Start()

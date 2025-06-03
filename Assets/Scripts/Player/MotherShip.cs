@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Cinemachine;
+using Architecture;
 
 public class MotherShip : MonoBehaviour
 {
@@ -191,6 +191,7 @@ public class MotherShip : MonoBehaviour
     this.SetCraftShipBarrierPower(this.status.Distribution.CraftShipBarrier.Value);
     this.status.Distribution.MotherShipBarrier.OnChanged += this.SetCraftShipBarrierPower;
     this.interior.transform.localPosition = CameraManager.Shared.SideviewOffset;
+    this.ShowStatusUI();
   }
 
   void OnEnable()
@@ -221,6 +222,20 @@ public class MotherShip : MonoBehaviour
     if (this.sideAttack.IsActive) {
       this.UpdateInterior();
     }
+  }
+
+  void ShowStatusUI()
+  {
+    var borneCraftsStatus = new (
+        ObservableValue<(int, int)>,
+        ObservableValue<(int, int)>)[this.borneCrafts.Count];
+    for (int i = 0; i < this.borneCrafts.Count; ++i) {
+      borneCraftsStatus[i] = (this.borneCrafts[i].Hp, this.borneCrafts[i].Barrier);
+    }
+    UIManager.Shared.SetHp(
+      (this.health.Hp, this.health.Barrier),
+      borneCraftsStatus 
+    );
   }
 
   void UpdateInterior()

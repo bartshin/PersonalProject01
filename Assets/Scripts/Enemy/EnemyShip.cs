@@ -229,6 +229,7 @@ public class EnemyShip : MonoBehaviour
     if (this.target == null && attackerDamagble != null) {
       this.StartCombatWith(attackerDamagble);
     }
+    this.OnSelected();
   }
 
   void StartCombatWith(IDamagable target)
