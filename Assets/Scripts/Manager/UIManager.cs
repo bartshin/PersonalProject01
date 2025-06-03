@@ -6,7 +6,8 @@ using Architecture;
 
 public class UIManager : SingletonBehaviour<UIManager>
 {
-
+  public static readonly Color CRAFTSHIP_PORTRAIT_BACKGROUND_COLOR = new Color(
+      51f/255f, 51f/255f, 51f/255f);
   CombatUI combatUI;
 
   public enum PopupUI
@@ -17,11 +18,16 @@ public class UIManager : SingletonBehaviour<UIManager>
   }
   GameObject combatUIPrefab;
   GameObject loadingUIPrefab;
+  public RenderTexture[] CraftshipTextures => this.combatUI.CraftshipTextures;
 
   public void SetHp(
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier) motherShip,
-      (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftShips
-      ) => this.combatUI.SetHp(motherShip, borneCraftShips);
+      (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftships
+      ) => this.combatUI.SetHp(motherShip, borneCraftships);
+
+  public void ShowCraftshipPortrait(int index) => this.combatUI.SetCraftshipPortraitVisible(index, true);
+
+  public void HideCraftshipPortrait(int index) => this.combatUI.SetCraftshipPortraitVisible(index, false);
 
   void Awake()
   {

@@ -11,7 +11,8 @@ public class BorneCraft : MonoBehaviour
     public float RotateAngle;   
     public float WaitOffset;
   }
-
+  public Transform Ship => this.ship.transform;
+  public Action<BorneCraft> OnSortie;
   [Header("References")]
   [SerializeField]
   GameObject ship;
@@ -26,7 +27,7 @@ public class BorneCraft : MonoBehaviour
   [SerializeField]
   Transform target;
   [SerializeField]
-  CraftShipHealth health;
+  CraftshipHealth health;
 
   [Header("Movement Configs")]
   [SerializeField]
@@ -111,7 +112,7 @@ public class BorneCraft : MonoBehaviour
       this.rb = this.GetComponent<Rigidbody>();
     }
     if (this.health == null) {
-      this.health = this.GetComponent<CraftShipHealth>();
+      this.health = this.GetComponent<CraftshipHealth>();
     }
     this.movement = this.InitMovement();
     this.attack = this.InitAttack();
@@ -225,6 +226,9 @@ public class BorneCraft : MonoBehaviour
   {
     this.body.SetActive(true);
     this.isSortie = true;
+    if (this.OnSortie != null) {
+      this.OnSortie.Invoke(this);
+    }
   }
 
   void UpdateContainer()

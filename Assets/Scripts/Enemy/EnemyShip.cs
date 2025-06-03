@@ -68,6 +68,7 @@ public class EnemyShip : MonoBehaviour
     if (this.HpBar != null && !this.HpBar.gameObject.activeSelf) {
       this.HpBar.gameObject.transform.rotation = Camera.main.transform.rotation;
       this.HpBar.gameObject.SetActive(true);
+      this.HpBar.WatchingIntValue = this.health.Hp;
     }
   }
 
@@ -150,8 +151,7 @@ public class EnemyShip : MonoBehaviour
   {
     this.health.OnTakeDamage += this.OnTakeDamage;
     this.health.OnDestroyed += this.OnDestroyed;
-    if (this.HpBar != null && this.health != null) {
-      this.HpBar.WatchingIntValue = this.health.Hp;
+    if (this.HpBar != null) {
       this.HpBar.gameObject.SetActive(false);
     }
     if (this.HpBarPointerHandler != null) {

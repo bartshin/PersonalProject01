@@ -12,21 +12,21 @@ public class StatusController : MonoBehaviour
     public ObservableValue<int> MotherShipBarrier { get; private set; }
     public ObservableValue<int> MotherShipSpeed { get; private set; }
     public ObservableValue<int> MotherShipBooster { get; private set; }
-    public ObservableValue<int> CraftShipBarrier { get; private set; }
+    public ObservableValue<int> CraftshipBarrier { get; private set; }
 
     public PowerDistribution(
       int maxPower,
       int motherShipBarrier,
       int motherShipSpeed,
       int motherShipBooster,
-      int craftShipBarrier
+      int craftshipBarrier
     )
     {
       this.MaxPower = maxPower;
       this.MotherShipBarrier = new (motherShipBarrier);
       this.MotherShipSpeed = new (motherShipSpeed);
       this.MotherShipBooster = new (motherShipBooster);
-      this.CraftShipBarrier = new (craftShipBarrier);
+      this.CraftshipBarrier = new (craftshipBarrier);
     }
 
     public void SetPower(int power)
@@ -62,7 +62,7 @@ public class StatusController : MonoBehaviour
       motherShipBarrier: this.distributionConfigs.MotherShipBarrier,
       motherShipSpeed: this.distributionConfigs.MotherShipSpeed,
       motherShipBooster: this.distributionConfigs.MotherShipBooster,
-      craftShipBarrier: this.distributionConfigs.CraftShipBarrier
+      craftshipBarrier: this.distributionConfigs.CraftshipBarrier
     );
   }
 
@@ -83,7 +83,7 @@ public class StatusController : MonoBehaviour
       this.Distribution.MotherShipBarrier.Value = this.distributionConfigs.MotherShipBarrier;
       this.Distribution.MotherShipSpeed.Value = this.distributionConfigs.MotherShipSpeed;
       this.Distribution.MotherShipBooster.Value = this.distributionConfigs.MotherShipBooster;
-      this.Distribution.CraftShipBarrier.Value = this.distributionConfigs.CraftShipBarrier;
+      this.Distribution.CraftshipBarrier.Value = this.distributionConfigs.CraftshipBarrier;
     }
   }
 
@@ -94,6 +94,6 @@ public class StatusController : MonoBehaviour
     public int MotherShipBarrier; 
     public int MotherShipSpeed;
     public int MotherShipBooster;
-    public int CraftShipBarrier;
+    public int CraftshipBarrier;
   }
 }

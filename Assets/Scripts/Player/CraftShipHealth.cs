@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Architecture;
 
-public class CraftShipHealth : ShipHealth
+public class CraftshipHealth : ShipHealth
 {
   [SerializeField]
   public int MaxBarrier; 
 
   public ObservableValue<(int current, int max)> Barrier { get; private set; } = new ();
-  public Action<CraftShipHealth> OnPowerDown;
+  public Action<CraftshipHealth> OnPowerDown;
 
   public int RestoreBarrier(int amount)
   {

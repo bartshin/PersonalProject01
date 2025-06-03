@@ -58,9 +58,11 @@ public class GauageImageUI : MonoBehaviour
   {
     if (this.watchingFloatValue != null) {
       this.watchingFloatValue.OnChanged -= this.OnValueChanged;
+      this.watchingFloatValue = null;
     }
     else if (this.watchingIntValue != null) {
       this.watchingIntValue.OnChanged -= this.OnValueChanged;
+      this.watchingIntValue = null;
     }
   }
 

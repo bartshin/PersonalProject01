@@ -8,8 +8,9 @@ public class CombatUI : MonoBehaviour
 {
   public const string PREFAB_NAME = "CombatUI";
   public bool IsShowing { get; private set; }
+  public RenderTexture[] CraftshipTextures => this.hpView.CraftshipTextures;
   ObservableValue<(int, int)> motherShipHp;
-  ObservableValue<(int, int)>[] borneCraftShipsHp;
+  ObservableValue<(int, int)>[] borneCraftshipsHp;
   const string CONTAINER_NAME = "combatUI-container";
   VisualElement root;
   PlayerHpView hpView;
@@ -28,54 +29,32 @@ public class CombatUI : MonoBehaviour
     this.root.SendToBack();
   }
 
+  public void SetCraftshipPortraitVisible(int index, bool visible)
+  {
+    var portrait = this.hpView.CraftshipPortrait[index];
+    this.hpView.SetHiddenTo(portrait, !visible);
+  }
+
   public void SetHp(
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier) motherShip,
-      (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftShips)
+      (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftships)
   {
     this.hpView.CreateMotherShipStatus();
-    this.hpView.CreateBronecraftStatus(borneCraftShips.Length);
+    this.hpView.CreateBronecraftStatus(borneCraftships.Length);
     motherShip.hp.OnChanged += this.OnMotherShipHpChanged;
     motherShip.barrier.OnChanged += this.OnMotherShipBarrierChanged;
 
-    for (int i = 0; i < borneCraftShips.Length; ++i) {
+    for (int i = 0; i < borneCraftships.Length; ++i) {
       var index = i;
-      borneCraftShips[i].hp.OnChanged += (hp) => this.OnBornecraftShipHpChanged(index, hp);
-      borneCraftShips[i].barrier.OnChanged += (barrier) => this.OnBornecraftShipBarrierChanged(index, barrier);
+      borneCraftships[i].hp.OnChanged += (hp) => this.OnCraftshipHpChanged(index, hp);
+      borneCraftships[i].barrier.OnChanged += (barrier) => this.OnCraftshipBarrierChanged(index, barrier);
     }
-  }
-
-  void OnMotherShipHpChanged((int current, int max) hp)
-  {
-    float percentage = (float)hp.current / (float)hp.max;
-    this.hpView.SetValue(this.hpView.MotherShipHandle.hp, percentage);
-  }
-
-  void OnMotherShipBarrierChanged((int current, int max) barrier)
-  {
-    float percentage = (float)barrier.current / (float)barrier.max;
-    this.hpView.SetValue(this.hpView.MotherShipHandle.barrier, percentage);
-  }
-
-  void OnBornecraftShipHpChanged(int index, (int current, int max) hp)
-  {
-    float percentage = (float)hp.current / (float)hp.max;
-    this.hpView.SetValue(this.hpView.BornecraftShipHpHandles[index].hp, percentage);
-  }
-
-  void OnBornecraftShipBarrierChanged(int index, (int current, int max) barrier)
-  {
-    float percentage = (float)barrier.current / (float)barrier.max;
-    this.hpView.SetValue(this.hpView.BornecraftShipHpHandles[index].barrier, percentage);
   }
 
   void Awake()
   {
     this.Init();
     this.CreateUI();
-  }
-
-  void Start()
-  {
   }
 
   void CreateUI()
@@ -92,11 +71,36 @@ public class CombatUI : MonoBehaviour
     }
   }
 
+
   void Init()
   {
     this.root = this.GetComponent<UIDocument>().rootVisualElement;
     this.root.name = CombatUI.CONTAINER_NAME;
     this.root.style.width = Length.Percent(100);
     this.root.style.height = Length.Percent(100);
+  }
+
+  void OnMotherShipHpChanged((int current, int max) hp)
+  {
+    float percentage = (float)hp.current / (float)hp.max;
+    this.hpView.SetValue(this.hpView.MotherShipHandle.hp, percentage);
+  }
+
+  void OnMotherShipBarrierChanged((int current, int max) barrier)
+  {
+    float percentage = (float)barrier.current / (float)barrier.max;
+    this.hpView.SetValue(this.hpView.MotherShipHandle.barrier, percentage);
+  }
+
+  void OnCraftshipHpChanged(int index, (int current, int max) hp)
+  {
+    float percentage = (float)hp.current / (float)hp.max;
+    this.hpView.SetValue(this.hpView.CraftshipHpHandles[index].hp, percentage);
+  }
+
+  void OnCraftshipBarrierChanged(int index, (int current, int max) barrier)
+  {
+    float percentage = (float)barrier.current / (float)barrier.max;
+    this.hpView.SetValue(this.hpView.CraftshipHpHandles[index].barrier, percentage);
   }
 }

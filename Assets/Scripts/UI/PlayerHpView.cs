@@ -9,26 +9,44 @@ public class PlayerHpView : VisualElement
   static readonly Color BARRIER_COLOR = new Color(0f, 202f/255f, 1f);
   /****************** Text ***********************************/
   const string MOTHERSHIP_LABEL_TEXT = "Mother Ship";
-  const string BORNECRAFT_SHIP_LABEL_TEXT = "Craft Ship";
+  const string CRAFTSHIP_LABEL_TEXT = "Sub Ship";
   /****************** USS Selector ***************************/
   const string CONTAINER = "player-hp-view-container";
-  const string BORNECRAFT_SHIPS_STATUS_VIEW = "bornecraft-ships-status-view";
+  const string CRAFTSHIPS_STATUS_VIEW = "bornecraft-ships-status-view";
   const string MOTHERSHIP_STATUS_CONTAINER = "mothership-status-container";
-  const string BORNECRAFT_SHIP_STATUS_CONTAINER = "bornecraft-ship-status-container";
+  const string CRAFTSHIP_STATUS_CONTAINER = "bornecraft-ship-status-container";
+  const string CRAFT_PORTRAIT_IMAGE = "bornecraft-portrait-image";
   const string STATUS_CONTAINER_LABEL = "status-container-label";
+  const string CRAFT_CONTEINR_LABEL = "bornecraft-container-label";
   const string BAR_CONTAINER = "bar-container";
   const string BAR_LABEL = "bar-label";
   const string BAR = "bar";
   const string BAR_BACKGROUND = "bar-background";
   const string BAR_FILL = "bar-fill";
   const string BAR_MASK = "bar-mask";
+  const string CRAFTSHIP_HP_BAR_CONTAINER = "craftship-hp-bar-container";
+  const string CRAFTSHIP_BARRIER_BAR_CONTAINER = "craftship-barrier-bar-container";
+  /******************** Constants ***************************/
+  readonly static Vector2Int CRAFTSHIP_TEXTURE_SIZE = new (128, 128);
 
+  public RenderTexture[] CraftshipTextures { get; private set; }
+  public VisualElement[] CraftshipPortrait { get; private set; }
   public (VisualElement hp, VisualElement barrier) MotherShipHandle { get; private set; }
-  public (VisualElement hp, VisualElement barrier)[] BornecraftShipHpHandles { get; private set; }
+  public (VisualElement hp, VisualElement barrier)[] CraftshipHpHandles { get; private set; }
 
   public PlayerHpView()
   {
     this.name = PlayerHpView.CONTAINER;
+  }
+
+  public void SetHiddenTo(VisualElement element, bool hidden)
+  {
+    if (hidden) {
+      element.AddToClassList("hidden");
+    }
+    else {
+      element.RemoveFromClassList("hidden");
+    }
   }
 
   public void CreateMotherShipStatus()
@@ -37,15 +55,17 @@ public class PlayerHpView : VisualElement
     this.Add(motherShipHpContainer);
   }
 
-  public void CreateBronecraftStatus(int bornecraftShipCount)
+  public void CreateBronecraftStatus(int bornecraftshipCount)
   {
-    this.BornecraftShipHpHandles = new (VisualElement, VisualElement)[bornecraftShipCount];
-    var bornecraftShipsHpView = new VisualElement();
-    bornecraftShipsHpView.name = PlayerHpView.BORNECRAFT_SHIPS_STATUS_VIEW;
-    for (int i = 0; i < bornecraftShipCount; ++i) {
-      bornecraftShipsHpView.Add(this.CreateBornecraftsStatusView(i)); 
+    this.CreateBronecraftTextures(bornecraftshipCount);
+    this.CraftshipHpHandles = new (VisualElement, VisualElement)[bornecraftshipCount];
+    this.CraftshipPortrait = new VisualElement[bornecraftshipCount];
+    var bornecraftshipsHpView = new VisualElement();
+    bornecraftshipsHpView.name = PlayerHpView.CRAFTSHIPS_STATUS_VIEW;
+    for (int i = 0; i < bornecraftshipCount; ++i) {
+      bornecraftshipsHpView.Add(this.CreateBornecraftsStatusView(i)); 
     } 
-    this.Add(bornecraftShipsHpView);
+    this.Add(bornecraftshipsHpView);
   }
 
   public void SetValue(VisualElement handle, float percentage)
@@ -54,6 +74,19 @@ public class PlayerHpView : VisualElement
       new Translate(new Length(percentage * 100f, LengthUnit.Percent),
         new Length())
     );
+  }
+
+  void CreateBronecraftTextures(int count)
+  {
+    this.CraftshipTextures = new RenderTexture[count];
+    for (int i = 0; i < this.CraftshipTextures.Length; ++i) {
+      this.CraftshipTextures[i] = new RenderTexture(
+        width: PlayerHpView.CRAFTSHIP_TEXTURE_SIZE.x,
+        height: PlayerHpView.CRAFTSHIP_TEXTURE_SIZE.y,
+        depth: 16,
+        format: RenderTextureFormat.ARGB32
+      ); 
+    }
   }
 
   VisualElement CreateMotherShipStatusView()
@@ -77,13 +110,34 @@ public class PlayerHpView : VisualElement
   VisualElement CreateBornecraftsStatusView(int number)
   {
     var container = new VisualElement();
-    container.AddToClassList(PlayerHpView.BORNECRAFT_SHIP_STATUS_CONTAINER);
-    var containerLabel = new Label($"{PlayerHpView.MOTHERSHIP_LABEL_TEXT} {number + 1}");
+    container.AddToClassList(PlayerHpView.CRAFTSHIP_STATUS_CONTAINER);
+    var containerLabel = new Label($"{PlayerHpView.CRAFTSHIP_LABEL_TEXT} {number + 1}");
     containerLabel.AddToClassList(PlayerHpView.STATUS_CONTAINER_LABEL);
-    var hpBar = this.CreateBar("HP", out VisualElement hpHandle, PlayerHpView.HP_COLOR);
-    var barrierBar = this.CreateBar("Shield", out VisualElement barrierHandle, PlayerHpView.BARRIER_COLOR);
-    
-    this.BornecraftShipHpHandles[number] = (hp: hpHandle,barrier: barrierHandle);
+    containerLabel.AddToClassList(PlayerHpView.CRAFT_CONTEINR_LABEL);
+    container.Add(containerLabel);
+
+    var portraitImage = new VisualElement();
+    portraitImage.AddToClassList(PlayerHpView.CRAFT_PORTRAIT_IMAGE);
+    portraitImage.AddToClassList("hidden");
+    portraitImage.style.backgroundImage = new StyleBackground(
+      Background.FromRenderTexture(this.CraftshipTextures[number])
+    );
+    container.Add(portraitImage);
+    this.CraftshipPortrait[number] = portraitImage;
+
+    var hpBar = this.CreateBar(
+       labelText: null,
+       handle: out VisualElement hpHandle,
+       color: PlayerHpView.HP_COLOR);
+    hpBar.AddToClassList(PlayerHpView.CRAFTSHIP_HP_BAR_CONTAINER);
+
+    var barrierBar = this.CreateBar(
+        labelText: null,
+        handle: out VisualElement barrierHandle,
+        color: PlayerHpView.BARRIER_COLOR);
+    barrierBar.AddToClassList(PlayerHpView.CRAFTSHIP_BARRIER_BAR_CONTAINER); 
+
+    this.CraftshipHpHandles[number] = (hp: hpHandle,barrier: barrierHandle);
     container.Add(hpBar);
     container.Add(barrierBar);
     return (container);
@@ -94,10 +148,12 @@ public class PlayerHpView : VisualElement
     var container = new VisualElement();
     container.AddToClassList(PlayerHpView.BAR_CONTAINER);
 
-    var label = new Label(labelText);
-    label.AddToClassList(PlayerHpView.BAR_LABEL);
-    label.style.color = color;
-    container.Add(label);
+    if (labelText != null) {
+      var label = new Label(labelText);
+      label.AddToClassList(PlayerHpView.BAR_LABEL);
+      label.style.color = color;
+      container.Add(label);
+    }
 
     var hpBar = new VisualElement();
     hpBar.AddToClassList(PlayerHpView.BAR);
