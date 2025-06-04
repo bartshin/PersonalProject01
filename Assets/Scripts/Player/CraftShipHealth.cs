@@ -22,9 +22,9 @@ public class CraftshipHealth : ShipHealth
   void Update()
   {
     //FIXME: Remove Test ****************
-    if (Input.GetKeyDown(KeyCode.Alpha6)) {
-      Debug.Log($"{this.gameObject.name} barrier: {this.Barrier.Value.current}/{this.Barrier.Value.max} hp: {this.Hp.Value.current}/{this.Hp.Value.max}");
-    }
+  //  if (Input.GetKeyDown(KeyCode.Alpha6)) {
+  //    Debug.Log($"{this.gameObject.name} barrier: {this.Barrier.Value.current}/{this.Barrier.Value.max} hp: {this.Hp.Value.current}/{this.Hp.Value.max}");
+  //  }
     //***********************************
   }
 

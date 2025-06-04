@@ -163,15 +163,15 @@ public class CameraManager : SingletonBehaviour<CameraManager>
 
   void Update()
   {
-    //FIXME: Make UI************************
+    //TODO: Make UI************************
     if (Input.GetKeyDown(KeyCode.Alpha1)) {
+      this.ActiveSideCamera.Value = null;
+    }
+    else if (Input.GetKeyDown(KeyCode.Alpha2)) {
       this.ActiveSideCamera.Value = Direction.Left;
     }
-    if (Input.GetKeyDown(KeyCode.Alpha2)) {
+    else if (Input.GetKeyDown(KeyCode.Alpha3)) {
       this.ActiveSideCamera.Value = Direction.Right;
-    }
-    if (Input.GetKeyDown(KeyCode.Alpha3)) {
-      this.ActiveSideCamera.Value = null;
     }
     //***************************************
   }

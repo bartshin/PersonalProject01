@@ -3,3 +3,13 @@
   height: 100%;
 }
 
+#timeview-container {
+  position: absolute;
+  top: 2%;
+  left: 48%;
+}
+
+#timeview-time-label {
+  color: white;
+  font-size: 50px;
+}

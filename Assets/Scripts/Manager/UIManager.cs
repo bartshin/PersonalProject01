@@ -20,6 +20,7 @@ public class UIManager : SingletonBehaviour<UIManager>
   GameObject combatUIPrefab;
   GameObject loadingUIPrefab;
   public RenderTexture[] CraftshipTextures => this.combatUI.CraftshipTextures;
+  public void SetTime(int seconds) => this.combatUI?.SetTime(seconds);
 
   public void SetBooster(ObservableValue<float> booster) => this.combatUI.SetBooster(booster);
 

@@ -195,6 +195,8 @@ public class MotherShip : MonoBehaviour
     this.SetCraftshipBarrierPower(this.status.Distribution.MotherShipBarrier.Value);
     this.interior.transform.localPosition = CameraManager.Shared.SideviewOffset;
     this.ShowUI();
+    GameManager.Shared.StartGame();
+    GameManager.Shared.StartSpwanEnemies(this.transform);
   }
 
   void OnEnable()
@@ -215,9 +217,9 @@ public class MotherShip : MonoBehaviour
   void Update()
   {
     //FIXME: Remove Test code ***********************
-    if (Input.GetKeyDown(KeyCode.Alpha6)) {
-      Debug.Log($"Battery: {this.craftshipBattery.Value.current}/{this.craftshipBattery.Value.max}");
-    }
+   // if (Input.GetKeyDown(KeyCode.Alpha6)) {
+   //   Debug.Log($"Battery: {this.craftshipBattery.Value.current}/{this.craftshipBattery.Value.max}");
+   // }
     //***********************************************
     this.UpdateCraftshipBattery(Time.deltaTime);
     this.movement.Update(Time.deltaTime);

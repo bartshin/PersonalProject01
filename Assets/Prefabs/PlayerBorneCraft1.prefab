@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 2426714538269307163}
   - component: {fileID: 6193561124625909130}
   m_Layer: 10
-  m_Name: PlayerBorneCraft
+  m_Name: PlayerBorneCraft1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -278,7 +278,7 @@ MonoBehaviour:
   maxMoveAngle: 180
   prepareSortieTime: 2
   waitOffset: 0
-  maxDistToSortie: 200
+  maxDistToSortie: 400
   maxShootAngle: 130
   shootRange: 3
   shootDelay: 0.9

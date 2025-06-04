@@ -5,12 +5,7 @@ using Architecture;
 
 public class AudioManager : SingletonBehaviour<AudioManager>
 {
-  public readonly static AudioClip SmallExposionSound;
-
-  static AudioManager()
-  {
-    AudioManager.SmallExposionSound = Resources.Load<AudioClip>("Audio/ship_explosion_short");
-  }
+  public static AudioClip SmallExposionSound { get; private set; }
 
   new public static void CreateInstance()  
   {
@@ -35,5 +30,6 @@ public class AudioManager : SingletonBehaviour<AudioManager>
     this.sfxPool = new MonoBehaviourPool<SfxController>(
         poolSize: DEFAULT_SFX_POOL_SIZE,
         prefab: sfxControllerPrefab);
+    AudioManager.SmallExposionSound = Resources.Load<AudioClip>("Audio/ship_explosion_short");
   }
 }

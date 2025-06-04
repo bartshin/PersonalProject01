@@ -12,6 +12,7 @@ public class BorneCraft : MonoBehaviour
     public float WaitOffset;
   }
   public Transform Ship => this.ship.transform;
+  const float TRAIL_LIFETIME = 3f;
   public Action<BorneCraft> OnSortie;
   [Header("References")]
   [SerializeField]

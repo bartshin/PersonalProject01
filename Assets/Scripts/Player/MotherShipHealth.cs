@@ -62,6 +62,20 @@ public class MotherShipHealth : ShipHealth
   {
     this.barrierRestore = (int)((float)this.status.Distribution.MotherShipBarrier.Value * this.barrierEfficiency);
     this.status.Distribution.MotherShipBarrier.OnChanged += this.OnPowerChanged;
+    GameManager.Shared.OnHealPlayer += this.OnHeal;
+  }
+
+  void OnHeal(int amount)
+  {
+    Debug.Log(amount);
+    if (this.Hp.Value.current == this.Hp.Value.max) {
+      var (current, max) = this.Barrier.Value;
+      this.Barrier.Value = (Math.Min(current + amount * 2, max), max);
+    }
+    else {
+      var (current, max) = this.Hp.Value;
+      this.Hp.Value = (Math.Min(current + max, max), max);
+    }
   }
 
   void Update()

@@ -17,9 +17,9 @@ public class EnemyShip : MonoBehaviour
   [SerializeField]
   GameObject target;
   [SerializeField]
-  ShipHealth health;
+  PlayerDetector detector;
   [SerializeField]
-  SphereCollider detectTrigger;
+  ShipHealth health;
   [SerializeField]
   GameObject projectile;
   [SerializeField]
@@ -79,6 +79,8 @@ public class EnemyShip : MonoBehaviour
     }
   }
 
+  public void AddPatrolPoint(Vector3 position) => this.movement.AddPatrolPosition(position);
+
   void Awake()
   {
     if (this.rb == null) {
@@ -90,8 +92,9 @@ public class EnemyShip : MonoBehaviour
     if (this.health == null) {
       this.health = this.GetComponent<ShipHealth>();
     }
-    if (this.detectTrigger != null) {
-      this.detectTrigger.radius = this.detectRange;
+    if (this.detector != null) {
+      this.detector.SetRange(this.detectRange);
+      this.detector.OnDetect += this.OnDetectPlayer;
     }
     this.attack = this.InitAttack();
     this.movement = this.InitMovement();
@@ -180,17 +183,17 @@ public class EnemyShip : MonoBehaviour
         this.attack.SetTarget(this.target.GetComponent<IDamagable>());
       }
     }
-    if (this.detectTrigger != null) {
-      this.detectTrigger.radius = this.detectRange;
+    if (this.detector != null) {
+      this.detector.SetRange(this.detectRange);
     }
   }
 
-  void OnTriggerEnter(Collider collider)
+  void OnDetectPlayer(Collider collider)
   {
     if (collider.gameObject.layer == this.playerMotherShipLayer ||
         (this.target == null && 
          collider.gameObject.layer == this.playerBorneCraftLayer)) {
-      var damagable = collider.gameObject.GetComponent<IDamagable>();
+      var damagable = IDamagable.GetDamagable(collider.gameObject) ?? IDamagable.FindIDamagableFrom(collider.gameObject);
       if (damagable != null) {
         this.StartCombatWith(damagable);
       }
@@ -262,6 +265,7 @@ public class EnemyShip : MonoBehaviour
     sfx.SetVolume(EnemyShip.DESTORYED_SOUND_VOLUME);
     sfx.PlaySound(AudioManager.SmallExposionSound);
     this.RemoveTarget();
+    Destroy(this.gameObject);
   }
 
   void OnClickHpbar(PointerEventData eventData)

@@ -48,7 +48,12 @@ public abstract class BaseProjectile : MonoBehaviour, IProjectile
     }
     var damagable = this.GetTargetFrom(collider);
     if (damagable != null) {
-      damagable.TakeDamage(this.Damage, this.FiredShip.transform, this.transform.position);
+      if (this.FiredShip.gameObject.activeSelf) {
+        damagable.TakeDamage(this.Damage, this.FiredShip.transform, this.transform.position);
+      }
+      else {
+        damagable.TakeDamage(this.Damage);
+      }
     }
     this.DestroySelf();
   }

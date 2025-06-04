@@ -16,6 +16,7 @@ public class CombatUI : MonoBehaviour
   VisualElement root;
   PlayerHpView hpView;
   StatusControlView statusControlView;
+  TimeView timeView;
 
   public void Show() 
   { 
@@ -30,6 +31,8 @@ public class CombatUI : MonoBehaviour
     this.IsShowing = false;
     this.root.SendToBack();
   }
+
+  public void SetTime(int seconds) => this.timeView.SetTime(seconds);
 
   public void SetBooster(ObservableValue<float> booster) 
   {
@@ -115,6 +118,8 @@ public class CombatUI : MonoBehaviour
 
   void CreateUI()
   {
+    this.timeView = new();
+    this.root.Add(this.timeView);
     this.hpView = new();
     this.root.Add(this.hpView);
     this.statusControlView = new();

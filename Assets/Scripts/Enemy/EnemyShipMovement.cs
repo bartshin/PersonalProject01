@@ -24,10 +24,13 @@ public class EnemyShipMovement
   public State CurrentState { get; private set; }
   public Configs configs;
   public float TargetDistance;
+  List<Vector3> patrolPositions;
+  int currentPatrolIndex;
   Transform body;
   Transform target;
   Rigidbody rb;
   float speedToStopThreshold = 0.5f;
+  float patrolThreshold = 3f;
   float remainingChasingTime;
   bool IsTargetInChasingRange => (this.TargetDistance < this.configs.ChasingRange.max && this.TargetDistance > this.configs.ChasingRange.min);
 
@@ -39,6 +42,14 @@ public class EnemyShipMovement
     this.rb = rigidbody;
     this.configs = configs;
     this.CurrentState = initialState;
+    this.patrolPositions = new (5) {
+      this.body.position
+    };
+  }
+
+  public void AddPatrolPosition(Vector3 position)
+  { 
+    this.patrolPositions.Add(position);
   }
 
   public void SetTarget(Transform target)
@@ -88,8 +99,47 @@ public class EnemyShipMovement
         if (this.IsTargetInChasingRange) {
           this.StartChasingTarget();
         }
+        else {
+          this.MoveToPatrolPosition(deltaTime);
+        }
         break;
     }
+  }
+
+  void MoveToPatrolPosition(float deltaTime)
+  {
+    var dist = Vector2.Distance(
+        this.body.position,
+        this.patrolPositions[this.currentPatrolIndex]);
+    Vector3 position;
+    if (dist < this.patrolThreshold) {
+      position = this.GetNextPatrolPosition();
+    }
+    else {
+      position = this.patrolPositions[this.currentPatrolIndex];
+    }
+    var dir = (position - this.body.position).normalized;
+    this.body.rotation = Quaternion.Lerp(
+      this.body.rotation,
+      Quaternion.LookRotation(dir),
+      1f * deltaTime
+    );
+    var currentSpeed = this.rb.velocity.magnitude;
+    var speed = Math.Min(
+        currentSpeed + this.configs.Acceleration,
+        this.configs.MaxSpeed
+    );
+    this.rb.velocity = this.body.forward * speed;
+  }
+
+  Vector3 GetNextPatrolPosition()
+  {
+    var index = this.currentPatrolIndex + 1; 
+    if (index >= this.patrolPositions.Count) {
+      index = 0;
+    }
+    this.currentPatrolIndex = index;
+    return (this.patrolPositions[index]);
   }
 
   void UpdateState()
@@ -137,7 +187,7 @@ public class EnemyShipMovement
     this.rb.velocity = Vector3.Lerp(
       this.rb.velocity,
       Vector3.zero,
-      10f * deltaTime
+      500f * deltaTime
     );
   }
 

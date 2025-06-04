@@ -86,18 +86,18 @@ public class CombatManager : SingletonBehaviour<CombatManager>
   void Update()
   {
     //FIXME: Remove test *********************************************
-    if (Input.GetKeyDown(KeyCode.Alpha4)) {
-      for (int i = 0; i < this.Targets.Count; i++) {
-        Debug.Log($"{i}: {this.Targets[i].gameObject.name}"); 
-      }
-    }
+   // if (Input.GetKeyDown(KeyCode.Alpha4)) {
+   //   for (int i = 0; i < this.Targets.Count; i++) {
+   //     Debug.Log($"{i}: {this.Targets[i].gameObject.name}"); 
+   //   }
+   // }
+    //****************************************************************
     if (Input.GetKeyDown(KeyCode.Return)) {
       this.ExecuteAttack();
     }
     if (Input.GetKeyDown(KeyCode.Escape)) {
       this.CancelAttack();
     }
-    //****************************************************************
   }
 
   void OnDestroy()
@@ -194,7 +194,7 @@ public class CombatManager : SingletonBehaviour<CombatManager>
           maxDistance: Mathf.Infinity,
           layerMask: this.enemyLayer
           )) {
-      return (hit.collider.GetComponent<IDamagable>());
+      return (IDamagable.FindIDamagableFrom(hit.collider.gameObject));
     }
     else {
       return (null);
