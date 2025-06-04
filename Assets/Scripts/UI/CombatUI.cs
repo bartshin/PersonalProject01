@@ -103,6 +103,7 @@ public class CombatUI : MonoBehaviour
   {
     this.Init();
     this.CreateUI();
+    this.Hide();
     UserInputManager.Shared.NavigateDirection.OnChanged += this.OnNavigationChanged;
   }
 

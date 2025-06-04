@@ -57,10 +57,13 @@ public class BorneCraft : MonoBehaviour
   float projectileSpeed;
   [SerializeField]
   float projectileLifeTime;
+  float powerOnPrepareTime = 5f;
 
   public Action<BorneCraft> OnReturned;
   public ObservableValue<(int, int)> Hp => this.health.Hp;
   public ObservableValue<(int, int)> Barrier => this.health.Barrier ;
+  bool isPowerDown;
+  float nextPowerOnTime;
   public Configs CraftConfigs 
   {
     get => this.configs;
@@ -115,6 +118,7 @@ public class BorneCraft : MonoBehaviour
     if (this.health == null) {
       this.health = this.GetComponent<CraftshipHealth>();
     }
+    this.isPowerDown = false;
     this.movement = this.InitMovement();
     this.attack = this.InitAttack();
   }
@@ -177,19 +181,37 @@ public class BorneCraft : MonoBehaviour
   void Start()
   {
     this.health.OnTakeDamage += this.OnTakeDamageFrom;
+    this.health.OnPowerDown += this.OnPowerDown;
   }
 
   void Update()
   {
+      if (this.target != null) {
+        this.UpdateTargetDistance();
+        this.UpdateContainer();
+      }
+      this.movement.Update(Time.deltaTime);
+    if (!this.isPowerDown) {
+      if (this.movement.IsShootable) {
+        this.attack.Update(Time.deltaTime);
+      }
+    }
+    else {
+      this.nextPowerOnTime -= Time.deltaTime;
+      if (this.nextPowerOnTime < 0) {
+        this.isPowerDown = false;
+        this.movement.IsPowerDown = false;
+        var max = this.health.Hp.Value.max;
+        this.health.Hp.Value = (max, max);
+      }
+    }
+  }
 
-    if (this.target != null) {
-      this.UpdateTargetDistance();
-      this.UpdateContainer();
-    }
-    this.movement.Update(Time.deltaTime);
-    if (this.movement.IsShootable) {
-      this.attack.Update(Time.deltaTime);
-    }
+  void OnPowerDown(IDamagable self)
+  {
+    this.isPowerDown = true;
+    this.movement.IsPowerDown = true;
+    this.nextPowerOnTime = this.powerOnPrepareTime;
   }
 
   void UpdateTargetDistance()

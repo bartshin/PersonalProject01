@@ -49,11 +49,8 @@ public class CraftshipHealth : ShipHealth
 
   protected override void OnRunoutHp()
   {
-    Debug.Log($"{this.gameObject.name} Destroyed");
     if (this.OnPowerDown != null) {
       this.OnPowerDown.Invoke(this);
-    }
-    else {
     }
   }
 

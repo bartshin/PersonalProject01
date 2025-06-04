@@ -27,13 +27,17 @@ public class GameManager : SingletonBehaviour<GameManager>
   [SerializeField]
   float enemySpawnInterval;
 
+  const float MAX_ENEMY_DIST = 500f;
+  const int MAX_ENEMY_COUNT = 50;
+
   public int ClearTimeInSeconds => (int)this.clearTime;
-  float passedTime = 0f;
+  float startTime;
+  float passedTime => Time.time - this.startTime;
   YieldInstruction WaitToCheckTime = new WaitForSeconds(0.5f);
   YieldInstruction WaitToSpawnEnemy = new WaitForSeconds(1f);
-  ObservableValue<int> TimeRemain = new ();
+  ObservableValue<int> TimeRemain;
   public Action OnClear;
-  float nextEnemySpawn;
+  float nextEnemySpawn = float.MaxValue;
 
   Dictionary<IDamagable, EnemyShip> currentEnemies;
   public Action<int> OnHealPlayer;
@@ -65,16 +69,38 @@ public class GameManager : SingletonBehaviour<GameManager>
     UIManager.CreateInstance();
   }
 
+  public void GameOver()
+  {
+    UIManager.Shared.SetVisbleCombatUI(false);  
+    UIManager.Shared.SetVisbleGreetingUI(true);  
+    UIManager.Shared.SetGameOverUI(false);
+    foreach (var (_, enemy) in this.currentEnemies) {
+      Destroy(enemy.gameObject);
+    }
+
+    this.currentEnemies.Clear();
+  }
+
+  public void OnClickStart()
+  {
+    var prefab = Resources.Load<GameObject>("Prefabs/PlayerMotherShip");
+    Instantiate(prefab);
+    UIManager.Shared.SetVisbleCombatUI(true);
+  }
+
   void Awake()
   {
     base.OnAwake();
     this.rand = new();
+    this.TimeRemain = new(this.ClearTimeInSeconds);
     this.currentEnemies = new();
   }
 
   public void StartGame()
   {
-    this.timeRoutine = this.StartCoroutine(this.CheckTime());
+    this.isClear = false;
+    this.startTime = Time.time;
+    this.timeRoutine = this.StartCoroutine(this.Tick());
     this.TimeRemain.Value = this.ClearTimeInSeconds;
     this.TimeRemain.OnChanged += this.OnTimeChanged;
   }
@@ -84,24 +110,48 @@ public class GameManager : SingletonBehaviour<GameManager>
     UIManager.Shared.SetTime(seconds);
   }
 
-  IEnumerator CheckTime()
+  IEnumerator Tick()
   {
     while (!this.isClear) {
-      this.passedTime += Time.deltaTime;
       this.TimeRemain.Value = this.ClearTimeInSeconds - (int)(this.passedTime);
-      this.nextEnemySpawn -= Time.deltaTime;
-      if (this.nextEnemySpawn < 0) {
+      if (this.nextEnemySpawn < Time.time && 
+          this.currentEnemies.Count < GameManager.MAX_ENEMY_COUNT) {
         this.SpawnEnemies();
-        this.nextEnemySpawn = this.enemySpawnInterval;
       }
       if (this.passedTime > this.clearTime) {
         this.isClear = true;
+        UIManager.Shared.SetVisbleCombatUI(false);  
+        UIManager.Shared.SetVisbleGreetingUI(true);  
+        UIManager.Shared.SetGameOverUI(true);
+        foreach (var (_, enemy) in this.currentEnemies) {
+          Destroy(enemy.gameObject);
+        }
+
+        this.currentEnemies.Clear();
         if (this.OnClear != null) {
           this.OnClear.Invoke();
         }
       }
       yield return (this.WaitToCheckTime);
     }
+  }
+
+  void CheckEnemy()
+  {
+    var player = GameObject.FindGameObjectWithTag("Player");
+    if (player != null) {
+      foreach (var (damagable, ship) in this.currentEnemies) {
+        var dist = Vector3.Distance( 
+            ship.transform.position,
+            player.transform.position);
+        if (dist < GameManager.MAX_ENEMY_DIST) { 
+          continue;
+        }
+        ship.transform.position = this.GetRandomPosition(player.transform.position);
+        ship.AddPatrolPoint(player.transform.position);
+      }
+    }
+
   }
 
   void SpawnEnemies()
@@ -112,6 +162,7 @@ public class GameManager : SingletonBehaviour<GameManager>
 
   public void StartSpwanEnemies(Transform player)
   {
+    this.nextEnemySpawn = Time.time + this.enemySpawnInterval;
     this.State = GameState.Spawning;
     if (this.spawnEnemyRoutine != null) {
       this.StopCoroutine(this.spawnEnemyRoutine);

@@ -58,9 +58,9 @@ MonoBehaviour:
   - 0.4
   enemySpawnMinRange: 30
   enemySpawnMaxRange: 500
-  maxEnemyCount: 10
-  minEnemyCount: 5
+  maxEnemyCount: 5
+  minEnemyCount: 2
   defaultHeal: 20
   healIncrease: 10
-  clearTime: 600
-  enemySpawnInterval: 30
+  clearTime: 300
+  enemySpawnInterval: 5

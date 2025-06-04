@@ -9,6 +9,7 @@ public class UIManager : SingletonBehaviour<UIManager>
   public static readonly Color CRAFTSHIP_PORTRAIT_BACKGROUND_COLOR = new Color(
       51f/255f, 51f/255f, 51f/255f, 0.5f);
   CombatUI combatUI;
+  GreetingUI greetingUI;
 
   public enum PopupUI
   {
@@ -18,7 +19,8 @@ public class UIManager : SingletonBehaviour<UIManager>
   }
   public StatusController.Field SelectedField => this.combatUI.SelectedField;
   GameObject combatUIPrefab;
-  GameObject loadingUIPrefab;
+  GameObject greetingUIPrefab;
+
   public RenderTexture[] CraftshipTextures => this.combatUI.CraftshipTextures;
   public void SetTime(int seconds) => this.combatUI?.SetTime(seconds);
 
@@ -37,6 +39,26 @@ public class UIManager : SingletonBehaviour<UIManager>
 
   public void HideCraftshipPortrait(int index) => this.combatUI.SetCraftshipPortraitVisible(index, false);
 
+  public void SetVisbleCombatUI(bool visible) {
+    if (visible) {
+      this.combatUI?.Show();
+    }
+    else {
+      this.combatUI?.Hide();
+    }
+  }
+
+  public void SetGameOverUI(bool isWin) => this.greetingUI.SetGameOverUI(isWin);
+
+  public void SetVisbleGreetingUI(bool visible) {
+    if (visible) {
+      this.greetingUI?.Show();
+    }
+    else {
+      this.greetingUI?.Hide();
+    }
+  }
+
   void Awake()
   {
     base.OnAwake();
@@ -45,6 +67,9 @@ public class UIManager : SingletonBehaviour<UIManager>
 
   void Init()
   {
+    this.greetingUIPrefab = ((GameObject)Resources.Load("Prefabs/GreetingUI"));
+    this.greetingUI = Instantiate(this.greetingUIPrefab).GetComponent<GreetingUI>();
+    this.greetingUI.transform.parent = this.transform;
     this.combatUIPrefab = ((GameObject)Resources.Load("Prefabs/" + CombatUI.PREFAB_NAME));
     this.combatUI = Instantiate(this.combatUIPrefab).GetComponent<CombatUI>();
     this.combatUI.transform.parent = this.transform;

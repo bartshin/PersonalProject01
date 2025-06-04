@@ -67,7 +67,6 @@ public class MotherShipHealth : ShipHealth
 
   void OnHeal(int amount)
   {
-    Debug.Log(amount);
     if (this.Hp.Value.current == this.Hp.Value.max) {
       var (current, max) = this.Barrier.Value;
       this.Barrier.Value = (Math.Min(current + amount * 2, max), max);
@@ -84,9 +83,9 @@ public class MotherShipHealth : ShipHealth
       this.RestoreBarrier(Time.deltaTime);
     }
     //FIXME: Remove Test ***************************
-    if (Input.GetKeyDown(KeyCode.Alpha5)) {
-      Debug.Log($"restore: {this.barrierRestore} current baerrier: {this.Barrier.Value.current} / {this.Barrier.Value.max}, hp: {this.Hp.Value.current} / {this.Hp.Value.max}");
-    }
+    //if (Input.GetKeyDown(KeyCode.Alpha5)) {
+    //  Debug.Log($"restore: {this.barrierRestore} current baerrier: {this.Barrier.Value.current} / {this.Barrier.Value.max}, hp: {this.Hp.Value.current} / {this.Hp.Value.max}");
+    //}
     //**********************************************
   }
 
@@ -129,7 +128,8 @@ public class MotherShipHealth : ShipHealth
 
   protected override void OnRunoutHp()
   {
-    Debug.Log("player died");
+    Destroy(this.gameObject);
+    GameManager.Shared.GameOver();
   }
 
   void OnTakeDamageFrom(int damage, Transform attacker, Nullable<Vector3> attackedPosition) 

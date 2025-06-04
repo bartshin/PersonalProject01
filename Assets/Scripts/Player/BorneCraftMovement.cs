@@ -43,6 +43,7 @@ public class BorneCraftMovement
     }
   }
 
+  public bool IsPowerDown;
   public Action OnReturnToShip;
   public Action OnSortie;
   public Configs configs;
@@ -94,10 +95,12 @@ public class BorneCraftMovement
   {
     if (this.target != null &&
         !isSortied && this.waitToSortie <= 0 &&
-        this.TargetDistance < this.configs.MaxDistToSortie) {
+        this.TargetDistance < this.configs.MaxDistToSortie &&
+        !this.IsPowerDown
+        ) {
       this.Sortie();
     }
-    if (this.target != null) {
+    if (this.target != null && !this.IsPowerDown) {
       this.IsShootable = this.currentOrbitAngle < this.configs.MaxShootAngle;
     }
     else {
@@ -115,7 +118,7 @@ public class BorneCraftMovement
         this.ReturnToMotherShip();
       }
     }
-    else {
+    else if (!this.IsPowerDown) {
       OnWaitToSortie(deltaTime);
     }
   }
