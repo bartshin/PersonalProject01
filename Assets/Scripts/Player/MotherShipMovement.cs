@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Architecture;
 
 public class MotherShipMovement
 {
@@ -28,11 +29,11 @@ public class MotherShipMovement
     public float BoosterConsume;
   }
 
+  public ObservableValue<float> BoosterGauge;
   public Configs configs;
   public bool IsRotatable;
   Rigidbody rb;
   Transform transform;
-  float currentBooster;
   bool isBoosting;
   float minBoostingGauge = 10f;
 
@@ -42,20 +43,25 @@ public class MotherShipMovement
     this.transform = transform;
     this.configs = configs;
     this.isBoosting = false;
-    this.currentBooster = 50f;
     this.IsRotatable = true;
+    this.BoosterGauge = new (0f);
   }
 
   public void Update(float deltaTime)
   {
     UserInput input = this.GetInput(); 
-    this.isBoosting = input.IsBoosting && this.currentBooster > this.minBoostingGauge;
+    this.isBoosting = input.IsBoosting && 
+      this.BoosterGauge.Value > this.minBoostingGauge;
     if (!this.isBoosting) {
-      this.currentBooster = Math.Min(this.currentBooster + this.configs.BoosterRestore * Time.deltaTime, 100f);
+      this.BoosterGauge.Value = Math.Min(
+          this.BoosterGauge.Value + 
+          this.configs.BoosterRestore * Time.deltaTime, 100f);
     }
     else {
-      this.currentBooster = Math.Max(this.currentBooster - this.configs.BoosterConsume * Time.deltaTime, 0f);
-      if (this.currentBooster < 0) {
+      this.BoosterGauge.Value = 
+        Math.Max(
+            this.BoosterGauge.Value - this.configs.BoosterConsume * Time.deltaTime, 0f);
+      if (this.BoosterGauge.Value <= 0) {
         this.isBoosting = false;
       }
     }

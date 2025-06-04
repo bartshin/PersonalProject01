@@ -31,6 +31,18 @@ public class CombatUI : MonoBehaviour
     this.root.SendToBack();
   }
 
+  public void SetBooster(ObservableValue<float> booster) 
+  {
+    booster.OnChanged += this.OnMotherShipBoosterChanged;
+    this.OnMotherShipBoosterChanged(booster.Value);
+  }
+
+  public void SetBattery(ObservableValue<(float, float)> battery)
+  {
+    battery.OnChanged += this.OnMotherShipBatteryChanged;
+    this.OnMotherShipBatteryChanged(battery.Value);
+  }
+
   public void SetPowerDistribution(StatusController.PowerDistribution distribution)
   {
     distribution.MotherShipBarrier.OnChanged += this.OnBarrierPowerChanged;
@@ -124,6 +136,19 @@ public class CombatUI : MonoBehaviour
     this.root.name = CombatUI.CONTAINER_NAME;
     this.root.style.width = Length.Percent(100);
     this.root.style.height = Length.Percent(100);
+  }
+
+  void OnMotherShipBoosterChanged(float booster) {
+    this.hpView.SetValue( 
+      this.hpView.MotherShipHandle.booster,
+      booster/ 100f 
+    );
+  }
+
+  void OnMotherShipBatteryChanged((float current, float max) battery)
+  {
+    this.hpView.SetValue(
+      this.hpView.MotherShipHandle.battery, battery.current / battery.max);
   }
 
   void OnMotherShipHpChanged((int current, int max) hp)

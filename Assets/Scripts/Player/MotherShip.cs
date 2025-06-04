@@ -89,8 +89,7 @@ public class MotherShip : MonoBehaviour
   List<BorneCraft> borneCrafts;
   Dictionary<BorneCraft, (Camera, int)> borneCraftCamera;
   IDamagable currentCraftTarget;
-  float craftshipBattery;
-  float craftshipBatteryMax;
+  ObservableValue<(float current, float max)> craftshipBattery;
   float craftshipBatteryCharge;
 
   void Awake()
@@ -104,6 +103,7 @@ public class MotherShip : MonoBehaviour
     if (this.health == null) {
       this.health = this.GetComponent<MotherShipHealth>();
     }
+    this.craftshipBattery = new ((0f, 0f));
     this.movement = this.InitMovement();
     this.sideAttack = this.InitSideAttack();
     this.InitBornCrafts();
@@ -192,8 +192,9 @@ public class MotherShip : MonoBehaviour
     this.status.Distribution.MotherShipBooster.OnChanged += this.SetBoosterPower;
     this.SetCraftshipBarrierPower(this.status.Distribution.CraftshipBattery.Value);
     this.status.Distribution.MotherShipBarrier.OnChanged += this.SetCraftshipBarrierPower;
+    this.SetCraftshipBarrierPower(this.status.Distribution.MotherShipBarrier.Value);
     this.interior.transform.localPosition = CameraManager.Shared.SideviewOffset;
-    this.ShowStatusUI();
+    this.ShowUI();
   }
 
   void OnEnable()
@@ -215,7 +216,7 @@ public class MotherShip : MonoBehaviour
   {
     //FIXME: Remove Test code ***********************
     if (Input.GetKeyDown(KeyCode.Alpha6)) {
-      Debug.Log($"Battery: {this.craftshipBattery}/{this.craftshipBatteryMax}");
+      Debug.Log($"Battery: {this.craftshipBattery.Value.current}/{this.craftshipBattery.Value.max}");
     }
     //***********************************************
     this.UpdateCraftshipBattery(Time.deltaTime);
@@ -226,7 +227,7 @@ public class MotherShip : MonoBehaviour
     }
   }
 
-  void ShowStatusUI()
+  void ShowUI()
   {
     var borneCraftsStatus = new (
         ObservableValue<(int, int)>,
@@ -252,6 +253,8 @@ public class MotherShip : MonoBehaviour
       borneCraft.OnSortie += this.OnBorneCraftSortie;
       borneCraft.OnReturned += this.OnBorneCraftReturned;
     }
+    UIManager.Shared.SetBooster(this.movement.BoosterGauge);
+    UIManager.Shared.SetBattery(this.craftshipBattery);
   }
 
   void OnBorneCraftSortie(BorneCraft craftship)
@@ -376,23 +379,26 @@ public class MotherShip : MonoBehaviour
 
   void SetCraftshipBarrierPower(int power) 
   {
-    this.craftshipBatteryMax = this.craftshipBatteryMaxEffiency * power;
-    this.craftshipBattery = Math.Min(
-      this.craftshipBattery, this.craftshipBatteryMax);
+    var (current, _) = this.craftshipBattery.Value;
+    var newBatteryMax = power * this.craftshipBatteryMaxEffiency;
+    this.craftshipBattery.Value = (Math.Min(current, newBatteryMax), newBatteryMax);
     this.craftshipBatteryCharge = this.craftshipBatteryEffiency * power;
   }
 
   void UpdateCraftshipBattery(float deltaTime)
   {
-    this.craftshipBattery = Math.Min(
-      this.craftshipBattery + this.craftshipBatteryCharge * deltaTime,
-      this.craftshipBatteryMax
-    );
+    var (current, max) = this.craftshipBattery.Value;
+    this.craftshipBattery.Value = (Math.Min(
+      current + this.craftshipBatteryCharge * deltaTime,
+      max
+    ), max);
   }
 
   void OnCraftshipReturned(BorneCraft craftship) 
   {
-    var restored = craftship.RestoreBarrier((int)this.craftshipBattery);
-    this.craftshipBattery -= (float)restored;
+    var restored = craftship.RestoreBarrier(
+        (int)(this.craftshipBattery.Value).current);
+    var (current, max) = this.craftshipBattery.Value;
+    this.craftshipBattery.Value = (current - (float)restored, max);
   }
 }

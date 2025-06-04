@@ -21,6 +21,10 @@ public class UIManager : SingletonBehaviour<UIManager>
   GameObject loadingUIPrefab;
   public RenderTexture[] CraftshipTextures => this.combatUI.CraftshipTextures;
 
+  public void SetBooster(ObservableValue<float> booster) => this.combatUI.SetBooster(booster);
+
+  public void SetBattery(ObservableValue<(float, float)> battery) => this.combatUI.SetBattery(battery);
+
   public void SetHp(
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier) motherShip,
       (ObservableValue<(int, int)> hp, ObservableValue<(int, int)> barrier)[] borneCraftships

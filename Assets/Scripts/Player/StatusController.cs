@@ -107,7 +107,6 @@ public class StatusController : MonoBehaviour
       _ => throw new NotImplementedException()
     };
     var extraPower = this.distribution.ExtraPower.Value;
-    Debug.Log(extraPower);
     if (field.Value > 0 && direction == Direction.Down) {
       field.Value -= 1;
       this.distribution.ExtraPower.Value += 1;

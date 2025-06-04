@@ -7,6 +7,8 @@ public class PlayerHpView : VisualElement
 {
   static readonly Color HP_COLOR = new Color(234f/255f, 45f/255f, 20f/255f);
   static readonly Color BARRIER_COLOR = new Color(0f, 202f/255f, 1f);
+  static readonly Color BOOSTER_COLOR = new Color(0f/255f, 202f/255f, 100f/255f);
+  static readonly Color BATTERY_COLOR = new Color(200f/255f, 202f/255f, 0f);
   /****************** Text ***********************************/
   const string MOTHERSHIP_LABEL_TEXT = "Mother Ship";
   const string CRAFTSHIP_LABEL_TEXT = "Sub Ship";
@@ -18,7 +20,7 @@ public class PlayerHpView : VisualElement
   const string CRAFT_PORTRAIT_IMAGE = "bornecraft-portrait-image";
   const string CRAFT_PORTRAIT_PLACEHOLDER = "bornecraft-portrait-placeholder";
   const string STATUS_CONTAINER_LABEL = "status-container-label";
-  const string CRAFT_CONTEINR_LABEL = "bornecraft-container-label";
+  const string CRAFT_CONTAINER_LABEL = "bornecraft-container-label";
   const string BAR_CONTAINER = "bar-container";
   const string BAR_LABEL = "bar-label";
   const string BAR = "bar";
@@ -33,7 +35,7 @@ public class PlayerHpView : VisualElement
   public RenderTexture[] CraftshipTextures { get; private set; }
   public (VisualElement portrait, VisualElement placeHolder)[] CraftshipPortrait { get; private set; }
   public VisualElement[] CraftshipPlaceholder { get; private set; }
-  public (VisualElement hp, VisualElement barrier) MotherShipHandle { get; private set; }
+  public (VisualElement hp, VisualElement barrier, VisualElement booster, VisualElement battery) MotherShipHandle { get; private set; }
   public (VisualElement hp, VisualElement barrier)[] CraftshipHpHandles { get; private set; }
 
   public PlayerHpView()
@@ -102,10 +104,16 @@ public class PlayerHpView : VisualElement
     var hpBar = this.CreateBar("HP", out VisualElement hpHandle, PlayerHpView.HP_COLOR);
 
     var barrierBar = this.CreateBar("Shield", out VisualElement barrierHandle, PlayerHpView.BARRIER_COLOR);
+
+    var boosterBar = this.CreateBar("Booster", out VisualElement boosterHandle, PlayerHpView.BOOSTER_COLOR);
+
+    var batteryBar = this.CreateBar("Battery", out VisualElement batteryHandle, PlayerHpView.BATTERY_COLOR);
     
-    this.MotherShipHandle = (hp: hpHandle, barrier: barrierHandle);
+    this.MotherShipHandle = (hp: hpHandle, barrier: barrierHandle, booster: boosterHandle, battery: batteryHandle);
     container.Add(hpBar);
     container.Add(barrierBar);
+    container.Add(boosterBar);
+    container.Add(batteryBar);
     return (container);
   }
 
@@ -114,8 +122,7 @@ public class PlayerHpView : VisualElement
     var container = new VisualElement();
     container.AddToClassList(PlayerHpView.CRAFTSHIP_STATUS_CONTAINER);
     var containerLabel = new Label($"{PlayerHpView.CRAFTSHIP_LABEL_TEXT} {number + 1}");
-    containerLabel.AddToClassList(PlayerHpView.STATUS_CONTAINER_LABEL);
-    containerLabel.AddToClassList(PlayerHpView.CRAFT_CONTEINR_LABEL);
+    containerLabel.AddToClassList(PlayerHpView.CRAFT_CONTAINER_LABEL);
     container.Add(containerLabel);
 
     var portraitImage = new VisualElement();
